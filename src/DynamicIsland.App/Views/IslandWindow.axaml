@@ -32,6 +32,16 @@
             Height="{Binding IslandHeight}"
             CornerRadius="{Binding IslandCornerRadius}"
             AutomationProperties.Name="Dynamic Island">
+      <Border.ContextMenu>
+        <ContextMenu>
+          <MenuItem Header="Settings…" Command="{Binding OpenSettingsCommand}" />
+          <MenuItem Header="Notifications" Command="{Binding OpenHistoryCommand}" />
+          <MenuItem Header="Timer" Command="{Binding OpenTimerPickerCommand}" />
+          <Separator />
+          <MenuItem Header="Hide island" Command="{Binding HideIslandCommand}" />
+          <MenuItem Header="Exit" Command="{Binding ExitAppCommand}" />
+        </ContextMenu>
+      </Border.ContextMenu>
       <Panel>
         <!-- Ambient colour from the album art, breathing slowly while music plays. -->
         <Border Classes="glow" Classes.on="{Binding ShowAmbientGlow}" Background="{Binding GlowBrush}" />

@@ -32,6 +32,28 @@ public partial class App : Application
 
     public override void Initialize() => AvaloniaXamlLoader.Load(this);
 
+    /// <summary>
+    /// Opens Settings whenever another launch of the app sets <paramref name="signal"/>
+    /// (so double-clicking the exe again is a way back into Settings).
+    /// </summary>
+    internal static void WatchForOpenSettingsSignal(EventWaitHandle signal)
+    {
+        var thread = new Thread(() =>
+        {
+            try
+            {
+                while (signal.WaitOne())
+                    Dispatcher.UIThread.Post(() => (Current as App)?.ShowSettings());
+            }
+            catch (ObjectDisposedException)
+            {
+                // App is shutting down.
+            }
+        })
+        { IsBackground = true, Name = "Open-settings signal" };
+        thread.Start();
+    }
+
     public override void OnFrameworkInitializationCompleted()
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
@@ -51,6 +73,7 @@ public partial class App : Application
             _system = demo ? new NullSystemStatusService() : PlatformServices.CreateSystemStatusService();
             _islandViewModel = new IslandViewModel(_settings, _media, _notifications, _system);
             _islandViewModel.SettingsRequested += (_, _) => ShowSettings();
+            _islandViewModel.ExitRequested += (_, _) => _desktop?.Shutdown();
 
             _island = new IslandWindow(PlatformServices.CreateIslandWindowPlatform()) { DataContext = _islandViewModel };
             _island.VisibilityPolicyChanged += (_, _) => UpdateIslandVisibility();
@@ -66,6 +89,9 @@ public partial class App : Application
             // Demo: a sample notification a few seconds after start.
             if (args.Contains("--demo"))
                 DispatcherTimer.RunOnce(() => _islandViewModel.ShowNotification(Dev.DemoNotifications.Teams()), TimeSpan.FromSeconds(4));
+
+            if (args.Contains("--settings"))
+                Dispatcher.UIThread.Post(ShowSettings);
 
             var snapshotIndex = Array.IndexOf(args, "--snapshot");
             if (snapshotIndex >= 0 && snapshotIndex + 1 < args.Length)

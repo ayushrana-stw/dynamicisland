@@ -215,14 +215,11 @@ public sealed partial class IslandViewModel
         }
     }
 
-    /// <summary>Swaps artwork, disposing the old image only after the cross-fade has finished with it.</summary>
-    private void ReplaceArtwork(Bitmap? image)
-    {
-        var old = Artwork;
-        Artwork = image;
-        if (old is not null)
-            DispatcherTimer.RunOnce(old.Dispose, TimeSpan.FromSeconds(1));
-    }
+    /// <summary>
+    /// Swaps artwork. The old image is deliberately not disposed: the cross-fade (and a hidden card's
+    /// pending layout) can still hold it, and drawing a disposed bitmap crashes. The GC frees it.
+    /// </summary>
+    private void ReplaceArtwork(Bitmap? image) => Artwork = image;
 
     private void ApplyAccent()
     {

@@ -164,11 +164,8 @@ public sealed partial class IslandViewModel
         NotificationTitle = hidePreview ? "New notification" : current.Title;
         NotificationBody = hidePreview ? "" : current.Body;
 
-        var (icon, _) = ArtworkLoader.Load(current.AppIcon);
-        var old = NotificationIcon;
-        NotificationIcon = icon;
-        if (old is not null)
-            DispatcherTimer.RunOnce(old.Dispose, TimeSpan.FromSeconds(1));
+        // The previous icon is left to the GC; see ReplaceArtwork for why it is not disposed.
+        NotificationIcon = ArtworkLoader.Load(current.AppIcon).Image;
 
         var more = _notificationQueue.Count - 1;
         NotificationMoreText = more > 0 ? $"+{more} more" : "";

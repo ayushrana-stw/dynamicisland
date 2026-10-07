@@ -64,10 +64,10 @@
     </Grid>
 
     <!-- App · controls · shortcuts -->
-    <Grid Grid.Row="2" Classes="pop d4" ColumnDefinitions="*,Auto,*" Margin="24,0,18,8" VerticalAlignment="Center">
+    <Grid Grid.Row="2" Classes="pop d4" ColumnDefinitions="*,Auto,*" Margin="24,0,14,8" VerticalAlignment="Center">
       <TextBlock Classes="caption" Text="{Binding MediaApp}" VerticalAlignment="Center" />
 
-      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="22" VerticalAlignment="Center">
+      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="16" VerticalAlignment="Center">
         <Button Classes="icon" Command="{Binding PreviousCommand}" ToolTip.Tip="Previous" AutomationProperties.Name="Previous track">
           <PathIcon Data="{StaticResource IconPrevious}" />
         </Button>
@@ -96,6 +96,10 @@
             <TextBlock Text="{Binding HistoryCountText}" />
           </Border>
         </Panel>
+        <Button Classes="icon small" Command="{Binding OpenSettingsCommand}"
+                ToolTip.Tip="Settings" AutomationProperties.Name="Settings">
+          <PathIcon Data="{StaticResource IconSettings}" />
+        </Button>
       </StackPanel>
     </Grid>
   </Grid>

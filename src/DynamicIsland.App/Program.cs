@@ -4,13 +4,26 @@ namespace DynamicIsland.App;
 
 internal static class Program
 {
+    private const string OpenSettingsSignalName = "DynamicIsland.OpenSettings";
+
     [STAThread]
     public static void Main(string[] args)
     {
-        // Only one island per user session.
+        // Only one island per user session. Launching it again opens Settings in the running copy.
         using var mutex = new Mutex(initiallyOwned: true, "DynamicIsland.SingleInstance", out var isFirstInstance);
         if (!isFirstInstance)
+        {
+            if (EventWaitHandle.TryOpenExisting(OpenSettingsSignalName, out var signal))
+            {
+                signal.Set();
+                signal.Dispose();
+            }
+
             return;
+        }
+
+        using var openSettingsSignal = new EventWaitHandle(false, EventResetMode.AutoReset, OpenSettingsSignalName);
+        App.WatchForOpenSettingsSignal(openSettingsSignal);
 
         AppDomain.CurrentDomain.UnhandledException += (_, e) => WriteCrashLog(e.ExceptionObject);
         TaskScheduler.UnobservedTaskException += (_, e) =>

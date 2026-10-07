@@ -293,6 +293,16 @@ public sealed partial class IslandViewModel : ObservableObject, IDisposable
         SettingsRequested?.Invoke(this, EventArgs.Empty);
     }
 
+    /// <summary>Hides the island; it comes back from the tray menu or Settings.</summary>
+    [RelayCommand]
+    private void HideIsland() => _settings.Update(Settings with { ShowIsland = false });
+
+    [RelayCommand]
+    private void ExitApp() => ExitRequested?.Invoke(this, EventArgs.Empty);
+
+    /// <summary>Raised when the user chooses Exit from the island's menu.</summary>
+    public event EventHandler? ExitRequested;
+
     private void RestartCollapseTimer(double extraSeconds = 0)
     {
         _collapseTimer.Stop();
@@ -387,7 +397,5 @@ public sealed partial class IslandViewModel : ObservableObject, IDisposable
         _system.BrightnessChanged -= OnBrightnessChanged;
         _system.PowerChanged -= OnPowerChanged;
         _system.PrivacyChanged -= OnPrivacyChanged;
-        Artwork?.Dispose();
-        NotificationIcon?.Dispose();
     }
 }
