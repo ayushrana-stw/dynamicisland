@@ -1,6 +1,7 @@
 using DynamicIsland.Core.Media;
 using DynamicIsland.Core.Notifications;
 using DynamicIsland.Core.Platform;
+using DynamicIsland.Core.SystemStatus;
 
 namespace DynamicIsland.App.Platform;
 
@@ -25,6 +26,33 @@ internal static class PlatformServices
         // macOS: Accessibility-based reader — coming in the Mac phase.
         return new NullNotificationService();
 #endif
+    }
+
+    public static ISystemStatusService CreateSystemStatusService()
+    {
+#if WINDOWS
+        return new Windows.SystemStatus.WindowsSystemStatusService();
+#else
+        return new NullSystemStatusService();
+#endif
+    }
+
+    /// <summary>A short, gentle alert sound (timer finished).</summary>
+    public static void PlayAlert()
+    {
+        try
+        {
+#if WINDOWS
+            Windows.WindowsSound.PlayAsterisk();
+#else
+            if (OperatingSystem.IsMacOS())
+                System.Diagnostics.Process.Start("afplay", "/System/Library/Sounds/Glass.aiff");
+#endif
+        }
+        catch (Exception)
+        {
+            // Sound is a nicety; never fail because of it.
+        }
     }
 
     public static IStartupManager CreateStartupManager()

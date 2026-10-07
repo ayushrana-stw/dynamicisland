@@ -12,6 +12,7 @@ using DynamicIsland.Core.Media;
 using DynamicIsland.Core.Notifications;
 using DynamicIsland.Core.Platform;
 using DynamicIsland.Core.Settings;
+using DynamicIsland.Core.SystemStatus;
 
 namespace DynamicIsland.App;
 
@@ -21,6 +22,7 @@ public partial class App : Application
     private SettingsService _settings = null!;
     private IMediaService _media = null!;
     private INotificationService _notifications = null!;
+    private ISystemStatusService _system = null!;
     private IStartupManager _startup = null!;
     private IslandViewModel _islandViewModel = null!;
     private IslandWindow _island = null!;
@@ -46,7 +48,8 @@ public partial class App : Application
             _notifications = demo ? new NullNotificationService() : PlatformServices.CreateNotificationService();
             _startup = PlatformServices.CreateStartupManager();
 
-            _islandViewModel = new IslandViewModel(_settings, _media, _notifications);
+            _system = demo ? new NullSystemStatusService() : PlatformServices.CreateSystemStatusService();
+            _islandViewModel = new IslandViewModel(_settings, _media, _notifications, _system);
             _islandViewModel.SettingsRequested += (_, _) => ShowSettings();
 
             _island = new IslandWindow(PlatformServices.CreateIslandWindowPlatform()) { DataContext = _islandViewModel };
@@ -56,6 +59,7 @@ public partial class App : Application
             UpdateIslandVisibility();
             _ = StartMediaAsync();
             _ = StartNotificationsAsync();
+            _system.Start();
 
             desktop.Exit += (_, _) => Shutdown();
 
@@ -102,7 +106,7 @@ public partial class App : Application
     {
         try
         {
-            await Dev.Snapshotter.RunAsync(_island, _islandViewModel, folder);
+            await Dev.Snapshotter.RunAsync(_island, _islandViewModel, _settings, folder);
         }
         finally
         {
@@ -217,5 +221,6 @@ public partial class App : Application
         _islandViewModel.Dispose();
         _media.Dispose();
         _notifications.Dispose();
+        _system.Dispose();
     }
 }

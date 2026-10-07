@@ -22,6 +22,18 @@
     <StreamGeometry x:Key="IconClose">M6.4 5 5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12 19 6.4 17.6 5 12 10.6z</StreamGeometry>
     <StreamGeometry x:Key="IconOpen">M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7zm5 16H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7z</StreamGeometry>
     <StreamGeometry x:Key="IconMute">M20 18.69 7.84 6.14 5.27 3.49 4 4.76l2.8 2.8v.01c-.52.99-.8 2.16-.8 3.42v5l-2 2v1h13.73l2 2L21 19.72l-1-1.03zM12 22c1.11 0 2-.89 2-2h-4c0 1.11.89 2 2 2zm6-7.32V11c0-3.08-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68c-.15.03-.29.08-.42.12-.1.03-.2.07-.3.11h-.01c-.01 0-.01 0-.02.01-.23.09-.46.2-.68.31 0 0-.01 0-.01.01L18 14.68z</StreamGeometry>
+    <StreamGeometry x:Key="IconBack">M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z</StreamGeometry>
+    <StreamGeometry x:Key="IconTimer">M15 1H9v2h6V1zm-4 13h2V8h-2v6zm8.03-6.61 1.42-1.42c-.43-.51-.9-.99-1.41-1.41l-1.42 1.42A8.96 8.96 0 0 0 12 4c-4.97 0-9 4.03-9 9s4.02 9 9 9 9-4.03 9-9c0-2.12-.74-4.07-1.97-5.61zM12 20c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z</StreamGeometry>
+    <StreamGeometry x:Key="IconStopwatch">M12 4a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm0 16a7 7 0 1 1 0-14 7 7 0 0 1 0 14zM10 1h4v2h-4zm1 6h2v6.2l3.6 2.1-1 1.7L11 14.3z</StreamGeometry>
+    <StreamGeometry x:Key="IconStop">M8 6h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z</StreamGeometry>
+    <StreamGeometry x:Key="IconPlus">M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z</StreamGeometry>
+    <StreamGeometry x:Key="IconVolume">M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 7.97v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z</StreamGeometry>
+    <StreamGeometry x:Key="IconVolumeMuted">M16.5 12A4.5 4.5 0 0 0 14 7.97v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51A8.8 8.8 0 0 0 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3 3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06a8.99 8.99 0 0 0 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4 9.91 6.09 12 8.18V4z</StreamGeometry>
+    <StreamGeometry x:Key="IconBrightness">M20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69zM12 18a6 6 0 1 1 0-12 6 6 0 0 1 0 12zm0-10a4 4 0 1 0 0 8 4 4 0 0 0 0-8z</StreamGeometry>
+    <StreamGeometry x:Key="IconBatteryCharging">M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4zM11 20v-5.5H9L13 7v5.5h2L11 20z</StreamGeometry>
+    <StreamGeometry x:Key="IconBatteryAlert">M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4zM13 18h-2v-2h2v2zm0-4h-2V9h2v5z</StreamGeometry>
+    <StreamGeometry x:Key="IconMic">M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z</StreamGeometry>
+    <StreamGeometry x:Key="IconCamera">M17 10.5V7a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-3.5l4 4v-11l-4 4z</StreamGeometry>
     <StreamGeometry x:Key="IconBell">M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4a1.5 1.5 0 0 0-3 0v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z</StreamGeometry>
   </Styles.Resources>
 
@@ -197,6 +209,179 @@
   <Style Selector="Button.icon:focus-visible /template/ ContentPresenter#PART_ContentPresenter">
     <Setter Property="BorderBrush" Value="#B3FFFFFF" />
     <Setter Property="BorderThickness" Value="1.5" />
+  </Style>
+
+  <!-- ===== Chip buttons (quick actions, presets) ===== -->
+
+  <Style Selector="Button.chip">
+    <Setter Property="Background" Value="#1AFFFFFF" />
+    <Setter Property="Foreground" Value="{StaticResource IslandPrimaryText}" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="CornerRadius" Value="14" />
+    <Setter Property="Padding" Value="10,0" />
+    <Setter Property="Height" Value="40" />
+    <Setter Property="FontFamily" Value="{StaticResource IslandFont}" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="FontWeight" Value="Medium" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+    <Setter Property="RenderTransform" Value="scale(1)" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.3">
+          <TransformOperationsTransition.Easing><c:SpringEase Response="0.25" DampingFraction="0.55" Duration="0.3" /></TransformOperationsTransition.Easing>
+        </TransformOperationsTransition>
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector="Button.chip PathIcon">
+    <Setter Property="Width" Value="15" />
+    <Setter Property="Height" Value="15" />
+  </Style>
+  <Style Selector="Button.chip:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="#2EFFFFFF" />
+    <Setter Property="Foreground" Value="{StaticResource IslandPrimaryText}" />
+  </Style>
+  <Style Selector="Button.chip:pressed">
+    <Setter Property="RenderTransform" Value="scale(0.92)" />
+  </Style>
+  <Style Selector="Button.chip:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="#40FFFFFF" />
+  </Style>
+  <Style Selector="Button.chip.accent">
+    <Setter Property="Background" Value="#33FF9F0A" />
+    <Setter Property="Foreground" Value="#FFFF9F0A" />
+  </Style>
+  <Style Selector="Button.chip.accent:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="#4DFF9F0A" />
+    <Setter Property="Foreground" Value="#FFFF9F0A" />
+  </Style>
+  <Style Selector="Button.chip.small">
+    <Setter Property="Height" Value="26" />
+    <Setter Property="CornerRadius" Value="13" />
+    <Setter Property="FontSize" Value="11" />
+  </Style>
+
+  <!-- ===== Count badge on icon buttons ===== -->
+
+  <Style Selector="Border.badge">
+    <Setter Property="Background" Value="#FFFF453A" />
+    <Setter Property="CornerRadius" Value="7" />
+    <Setter Property="MinWidth" Value="14" />
+    <Setter Property="Height" Value="14" />
+    <Setter Property="Padding" Value="3,0" />
+    <Setter Property="HorizontalAlignment" Value="Right" />
+    <Setter Property="VerticalAlignment" Value="Top" />
+    <Setter Property="IsHitTestVisible" Value="False" />
+  </Style>
+  <Style Selector="Border.badge TextBlock">
+    <Setter Property="FontSize" Value="9" />
+    <Setter Property="FontWeight" Value="Bold" />
+    <Setter Property="Foreground" Value="White" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+
+  <!-- ===== Split-island bubble ===== -->
+
+  <Style Selector="Border.bubble">
+    <Setter Property="Width" Value="34" />
+    <Setter Property="Height" Value="34" />
+    <Setter Property="CornerRadius" Value="17" />
+    <Setter Property="Background" Value="{StaticResource IslandBackground}" />
+    <Setter Property="BorderBrush" Value="{StaticResource IslandOutline}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="HorizontalAlignment" Value="Center" />
+    <Setter Property="VerticalAlignment" Value="Top" />
+    <Setter Property="Opacity" Value="0" />
+    <Setter Property="IsHitTestVisible" Value="False" />
+    <Setter Property="RenderTransformOrigin" Value="0%,50%" />
+    <Setter Property="RenderTransform" Value="translateX(-26px) scale(0.2)" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <DoubleTransition Property="Opacity" Duration="0:0:0.2" />
+        <ThicknessTransition Property="Margin" Duration="0:0:0.6">
+          <ThicknessTransition.Easing><c:SpringEase Response="0.42" DampingFraction="0.74" Duration="0.6" /></ThicknessTransition.Easing>
+        </ThicknessTransition>
+        <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.6">
+          <TransformOperationsTransition.Easing><c:SpringEase Response="0.42" DampingFraction="0.6" Duration="0.6" /></TransformOperationsTransition.Easing>
+        </TransformOperationsTransition>
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector="Border.bubble.shown">
+    <Setter Property="Opacity" Value="1" />
+    <Setter Property="IsHitTestVisible" Value="True" />
+    <Setter Property="RenderTransform" Value="translateX(0px) scale(1)" />
+  </Style>
+
+  <!-- ===== Privacy dot (mic/camera in use) ===== -->
+
+  <Style Selector="Ellipse.privacy">
+    <Setter Property="Width" Value="6" />
+    <Setter Property="Height" Value="6" />
+    <Setter Property="IsHitTestVisible" Value="False" />
+  </Style>
+
+  <!-- ===== Seekable progress bar ===== -->
+
+  <Style Selector="Panel.seek">
+    <Setter Property="Height" Value="16" />
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+  <Style Selector="Panel.seek.enabled">
+    <Setter Property="Cursor" Value="Hand" />
+  </Style>
+  <Style Selector="Panel.seek Border.track">
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <DoubleTransition Property="Height" Duration="0:0:0.25">
+          <DoubleTransition.Easing><c:SpringEase Response="0.25" DampingFraction="0.7" Duration="0.25" /></DoubleTransition.Easing>
+        </DoubleTransition>
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector="Panel.seek.enabled:pointerover Border.track, Panel.seek.scrubbing Border.track">
+    <Setter Property="Height" Value="9" />
+  </Style>
+
+  <!-- ===== History rows ===== -->
+
+  <Style Selector="Button.row">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="CornerRadius" Value="14" />
+    <Setter Property="Padding" Value="8,6" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="Cursor" Value="Hand" />
+  </Style>
+  <Style Selector="Button.row:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="#14FFFFFF" />
+  </Style>
+  <Style Selector="Button.row:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="#24FFFFFF" />
+  </Style>
+
+  <!-- ===== Timer ===== -->
+
+  <Style Selector="TextBlock.bigtime">
+    <Setter Property="FontFamily" Value="{StaticResource IslandFont}" />
+    <Setter Property="FontSize" Value="40" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="FontFeatures" Value="+tnum" />
+    <Setter Property="Foreground" Value="#FFFF9F0A" />
+  </Style>
+  <Style Selector="TextBlock.bigtime.done">
+    <Style.Animations>
+      <Animation Duration="0:0:0.8" IterationCount="INFINITE" PlaybackDirection="Alternate" Easing="SineEaseInOut">
+        <KeyFrame Cue="0%"><Setter Property="Opacity" Value="1" /></KeyFrame>
+        <KeyFrame Cue="100%"><Setter Property="Opacity" Value="0.35" /></KeyFrame>
+      </Animation>
+    </Style.Animations>
   </Style>
 
   <!-- ===== Island press: a quick squeeze, like iOS ===== -->

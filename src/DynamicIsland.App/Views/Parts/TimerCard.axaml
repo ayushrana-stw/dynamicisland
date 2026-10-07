@@ -1,0 +1,43 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:DynamicIsland.App.ViewModels"
+             x:Class="DynamicIsland.App.Views.Parts.TimerCard"
+             x:DataType="vm:IslandViewModel"
+             Width="372" Height="132" HorizontalAlignment="Center" VerticalAlignment="Top">
+
+  <Grid RowDefinitions="*,Auto" Margin="24,14,20,18">
+    <Grid ColumnDefinitions="*,Auto">
+      <StackPanel Classes="pop d1" VerticalAlignment="Center">
+        <TextBlock Classes="caption" FontSize="12" Text="{Binding TimerLabel}" />
+        <TextBlock Classes="bigtime" Classes.done="{Binding TimerFinished}" Text="{Binding TimerText}" />
+      </StackPanel>
+
+      <StackPanel Grid.Column="1" Classes="pop d2" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+        <!-- Running/paused -->
+        <Button Classes="icon" Command="{Binding AddMinuteCommand}" ToolTip.Tip="Add 1 minute"
+                AutomationProperties.Name="Add one minute" IsVisible="{Binding TimerIsCountdown}">
+          <PathIcon Data="{StaticResource IconPlus}" />
+        </Button>
+        <Button Classes="icon large" Command="{Binding PauseResumeTimerCommand}" AutomationProperties.Name="Pause or resume"
+                IsVisible="{Binding !TimerFinished}" Background="#33FF9F0A" Foreground="#FFFF9F0A">
+          <Panel>
+            <PathIcon Classes="swap" Classes.on="{Binding TimerRunning}" Data="{StaticResource IconPause}" />
+            <PathIcon Classes="swap" Classes.on="{Binding TimerPaused}" Data="{StaticResource IconPlay}" />
+          </Panel>
+        </Button>
+        <Button Classes="icon" Command="{Binding StopTimerCommand}" ToolTip.Tip="Stop"
+                AutomationProperties.Name="Stop timer" IsVisible="{Binding !TimerFinished}">
+          <PathIcon Data="{StaticResource IconStop}" />
+        </Button>
+        <!-- Finished -->
+        <Button Classes="chip accent" Width="84" Content="Done" Command="{Binding StopTimerCommand}"
+                IsVisible="{Binding TimerFinished}" />
+      </StackPanel>
+    </Grid>
+
+    <Border Grid.Row="1" Classes="track pop d3" Width="{x:Static vm:IslandViewModel.TimerTrackWidth}"
+            HorizontalAlignment="Left" IsVisible="{Binding TimerIsCountdown}">
+      <Border Classes="fill smooth" Background="#FFFF9F0A" Width="{Binding TimerBarWidth}" />
+    </Border>
+  </Grid>
+</UserControl>

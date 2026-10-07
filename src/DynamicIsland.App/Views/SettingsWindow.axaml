@@ -109,6 +109,54 @@
               <ToggleSwitch Grid.Column="1" IsChecked="{Binding HideInFullScreen}"
                             AutomationProperties.Name="Hide while a full-screen app is open" />
             </Grid>
+            <Separator />
+            <Grid Classes="row" ColumnDefinitions="*,Auto">
+              <StackPanel VerticalAlignment="Center" Spacing="2">
+                <TextBlock Classes="label" Text="Preview on hover" />
+                <TextBlock Classes="hint" Text="Pointing at the island shows the song title or the time." />
+              </StackPanel>
+              <ToggleSwitch Grid.Column="1" IsChecked="{Binding HoverPreview}" AutomationProperties.Name="Preview on hover" />
+            </Grid>
+          </StackPanel>
+        </Border>
+
+        <!-- System -->
+        <TextBlock Classes="section" Text="System" />
+        <Border Classes="card">
+          <StackPanel>
+            <Grid Classes="row" ColumnDefinitions="*,Auto">
+              <TextBlock Classes="label" Text="Show volume changes" />
+              <ToggleSwitch Grid.Column="1" IsChecked="{Binding ShowVolume}" AutomationProperties.Name="Show volume changes" />
+            </Grid>
+            <Separator />
+            <Grid Classes="row" ColumnDefinitions="*,Auto">
+              <StackPanel VerticalAlignment="Center" Spacing="2">
+                <TextBlock Classes="label" Text="Show brightness changes" />
+                <TextBlock Classes="hint" Text="Laptop screens only." />
+              </StackPanel>
+              <ToggleSwitch Grid.Column="1" IsChecked="{Binding ShowBrightness}" AutomationProperties.Name="Show brightness changes" />
+            </Grid>
+            <Separator />
+            <Grid Classes="row" ColumnDefinitions="*,Auto">
+              <StackPanel VerticalAlignment="Center" Spacing="2">
+                <TextBlock Classes="label" Text="Charging and low-battery alerts" />
+                <TextBlock Classes="hint" Text="Shows when you plug in, and at 20% and 10%." />
+              </StackPanel>
+              <ToggleSwitch Grid.Column="1" IsChecked="{Binding ShowBatteryAlerts}" AutomationProperties.Name="Charging and low battery alerts" />
+            </Grid>
+            <Separator />
+            <Grid Classes="row" ColumnDefinitions="*,Auto">
+              <StackPanel VerticalAlignment="Center" Spacing="2">
+                <TextBlock Classes="label" Text="Microphone and camera indicator" />
+                <TextBlock Classes="hint" Text="Orange for microphone, green for camera, while any app uses them." />
+              </StackPanel>
+              <ToggleSwitch Grid.Column="1" IsChecked="{Binding ShowPrivacyIndicator}" AutomationProperties.Name="Microphone and camera indicator" />
+            </Grid>
+            <Separator />
+            <Grid Classes="row" ColumnDefinitions="*,Auto">
+              <TextBlock Classes="label" Text="Play a sound when a timer ends" />
+              <ToggleSwitch Grid.Column="1" IsChecked="{Binding TimerSound}" AutomationProperties.Name="Play a sound when a timer ends" />
+            </Grid>
           </StackPanel>
         </Border>
 

@@ -19,7 +19,7 @@ public partial class IslandWindow : Window
 
     private readonly IIslandWindowPlatform _platform;
     private IslandViewModel? _viewModel;
-    private Size _appliedBounds;
+    private Rect _appliedBounds;
     private int _boundsVersion;
     private bool _fullScreenAppActive;
 
@@ -41,6 +41,15 @@ public partial class IslandWindow : Window
         Island.PointerReleased += (_, _) => Island.Classes.Remove("pressing");
         Island.PointerCaptureLost += (_, _) => Island.Classes.Remove("pressing");
 
+        // The side bubble opens what it represents: the timer, or the island (mic/camera details).
+        Bubble.Tapped += (_, _) =>
+        {
+            if (_viewModel is { BubbleShowsTimer: true })
+                _viewModel.OpenTimerPickerCommand.Execute(null);
+            else
+                _viewModel?.Expand(peek: false);
+        };
+
         _platform.HotkeyPressed += (_, _) => OpenFromKeyboard();
         _platform.FullScreenChanged += OnFullScreenChanged;
         Deactivated += OnWindowDeactivated;
@@ -60,38 +69,12 @@ public partial class IslandWindow : Window
         base.OnDataContextChanged(e);
 
         if (_viewModel is not null)
-        {
             _viewModel.PropertyChanged -= OnViewModelPropertyChanged;
-            _viewModel.TrackChanged -= OnTrackChanged;
-            _viewModel.NotificationArrived -= OnNotificationArrived;
-        }
 
         _viewModel = DataContext as IslandViewModel;
 
         if (_viewModel is not null)
-        {
             _viewModel.PropertyChanged += OnViewModelPropertyChanged;
-            _viewModel.TrackChanged += OnTrackChanged;
-            _viewModel.NotificationArrived += OnNotificationArrived;
-        }
-    }
-
-    /// <summary>The artwork pops briefly; its spring transition carries it back.</summary>
-    private void OnTrackChanged(object? sender, EventArgs e)
-    {
-        CompactArt.Classes.Add("bump");
-        ExpandedArt.Classes.Add("bump");
-        DispatcherTimer.RunOnce(() =>
-        {
-            CompactArt.Classes.Remove("bump");
-            ExpandedArt.Classes.Remove("bump");
-        }, TimeSpan.FromMilliseconds(170));
-    }
-
-    private void OnNotificationArrived(object? sender, EventArgs e)
-    {
-        NotificationIconBorder.Classes.Add("bump");
-        DispatcherTimer.RunOnce(() => NotificationIconBorder.Classes.Remove("bump"), TimeSpan.FromMilliseconds(170));
     }
 
     private void OnIslandPointerPressed(object? sender, PointerPressedEventArgs e)
@@ -116,7 +99,7 @@ public partial class IslandWindow : Window
 
         Reposition();
         if (_viewModel is not null)
-            ApplyInteractiveBounds(new Size(_viewModel.IslandWidth, _viewModel.IslandHeight));
+            ApplyInteractiveBounds(TargetBounds());
     }
 
     protected override void OnClosed(EventArgs e)
@@ -159,8 +142,8 @@ public partial class IslandWindow : Window
     {
         switch (e.PropertyName)
         {
-            case nameof(IslandViewModel.IslandWidth) or nameof(IslandViewModel.IslandHeight):
-                OnIslandSizeChanged(new Size(_viewModel!.IslandWidth, _viewModel.IslandHeight));
+            case nameof(IslandViewModel.IslandWidth) or nameof(IslandViewModel.IslandHeight) or nameof(IslandViewModel.BubbleExtent):
+                OnIslandSizeChanged(TargetBounds());
                 break;
 
             case nameof(IslandViewModel.Settings):
@@ -174,10 +157,10 @@ public partial class IslandWindow : Window
     /// Keeps mouse input limited to the island. When growing, the input area grows immediately;
     /// when shrinking, it waits for the spring animation to finish so the island never looks clipped.
     /// </summary>
-    private void OnIslandSizeChanged(Size target)
+    private void OnIslandSizeChanged(Rect target)
     {
         var version = ++_boundsVersion;
-        var union = new Size(Math.Max(target.Width, _appliedBounds.Width), Math.Max(target.Height, _appliedBounds.Height));
+        var union = _appliedBounds.Width > 0 ? target.Union(_appliedBounds) : target;
 
         ApplyInteractiveBounds(union);
 
@@ -191,16 +174,25 @@ public partial class IslandWindow : Window
         }
     }
 
-    private void ApplyInteractiveBounds(Size island)
+    /// <summary>The island (plus the side bubble when shown) in window coordinates, with room for the hover scale.</summary>
+    private Rect TargetBounds()
     {
-        _appliedBounds = island;
-        if (island.Width <= 0 || island.Height <= 0)
+        if (_viewModel is null)
+            return default;
+
+        var width = _viewModel.IslandWidth;
+        var left = (Width - width) / 2 - HoverAllowance;
+        return new Rect(left, 0, width + _viewModel.BubbleExtent + HoverAllowance * 2,
+            _viewModel.IslandHeight + TopInset + HoverAllowance);
+    }
+
+    private void ApplyInteractiveBounds(Rect rect)
+    {
+        _appliedBounds = rect;
+        if (rect.Width <= 0 || rect.Height <= 0)
             return;
 
         var scale = RenderScaling;
-        var left = (Width - island.Width) / 2 - HoverAllowance;
-        var rect = new Rect(left, 0, island.Width + HoverAllowance * 2, island.Height + TopInset + HoverAllowance);
-
         _platform.SetInteractiveBounds(new PixelRect(
             (int)Math.Floor(rect.X * scale),
             (int)Math.Floor(rect.Y * scale),

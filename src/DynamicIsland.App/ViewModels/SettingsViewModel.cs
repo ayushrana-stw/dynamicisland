@@ -79,6 +79,14 @@ public sealed partial class SettingsViewModel : ObservableObject
     [ObservableProperty] public partial double VerticalOffset { get; set; }
     [ObservableProperty] public partial double AutoCollapseSeconds { get; set; }
     [ObservableProperty] public partial bool HideInFullScreen { get; set; }
+    [ObservableProperty] public partial bool HoverPreview { get; set; }
+
+    // System
+    [ObservableProperty] public partial bool ShowVolume { get; set; }
+    [ObservableProperty] public partial bool ShowBrightness { get; set; }
+    [ObservableProperty] public partial bool ShowBatteryAlerts { get; set; }
+    [ObservableProperty] public partial bool ShowPrivacyIndicator { get; set; }
+    [ObservableProperty] public partial bool TimerSound { get; set; }
 
     // Media
     [ObservableProperty] public partial bool ShowMedia { get; set; }
@@ -119,6 +127,12 @@ public sealed partial class SettingsViewModel : ObservableObject
         VerticalOffset = s.VerticalOffset;
         AutoCollapseSeconds = s.AutoCollapseSeconds;
         HideInFullScreen = s.HideInFullScreen;
+        HoverPreview = s.HoverPreview;
+        ShowVolume = s.ShowVolume;
+        ShowBrightness = s.ShowBrightness;
+        ShowBatteryAlerts = s.ShowBatteryAlerts;
+        ShowPrivacyIndicator = s.ShowPrivacyIndicator;
+        TimerSound = s.TimerSound;
         ShowMedia = s.ShowMedia;
         ExpandOnTrackChange = s.ExpandOnTrackChange;
         AnimatedVisualizer = s.AnimatedVisualizer;
@@ -136,7 +150,8 @@ public sealed partial class SettingsViewModel : ObservableObject
         nameof(ShowIsland), nameof(StartWithSystem), nameof(SelectedDisplay), nameof(VerticalOffset),
         nameof(AutoCollapseSeconds), nameof(HideInFullScreen), nameof(ShowMedia), nameof(ExpandOnTrackChange),
         nameof(AnimatedVisualizer), nameof(TintFromArtwork), nameof(ShowNotifications),
-        nameof(HideNotificationPreviews), nameof(ExpandOnNotification),
+        nameof(HideNotificationPreviews), nameof(ExpandOnNotification), nameof(HoverPreview),
+        nameof(ShowVolume), nameof(ShowBrightness), nameof(ShowBatteryAlerts), nameof(ShowPrivacyIndicator), nameof(TimerSound),
     ];
 
     protected override void OnPropertyChanged(PropertyChangedEventArgs e)
@@ -166,6 +181,12 @@ public sealed partial class SettingsViewModel : ObservableObject
             VerticalOffset = Math.Round(VerticalOffset),
             AutoCollapseSeconds = Math.Round(AutoCollapseSeconds),
             HideInFullScreen = HideInFullScreen,
+            HoverPreview = HoverPreview,
+            ShowVolume = ShowVolume,
+            ShowBrightness = ShowBrightness,
+            ShowBatteryAlerts = ShowBatteryAlerts,
+            ShowPrivacyIndicator = ShowPrivacyIndicator,
+            TimerSound = TimerSound,
             ShowMedia = ShowMedia,
             ExpandOnTrackChange = ExpandOnTrackChange,
             AnimatedVisualizer = AnimatedVisualizer,

@@ -49,6 +49,15 @@ internal sealed class DemoMediaService : IMediaService
         return Task.CompletedTask;
     }
 
+    public Task SeekAsync(TimeSpan position)
+    {
+        _seekTo = position;
+        Publish();
+        return Task.CompletedTask;
+    }
+
+    private TimeSpan? _seekTo;
+
     private void Publish(bool newTrack = false)
     {
         var track = Tracks[_index];
@@ -56,13 +65,15 @@ internal sealed class DemoMediaService : IMediaService
             _artwork[_index] = art = RenderArtwork(track.From, track.To);
 
         var now = DateTimeOffset.Now;
-        var position = newTrack || Current is null ? TimeSpan.FromSeconds(47) : Current.PositionAt(now);
+        var position = _seekTo ?? (newTrack || Current is null ? TimeSpan.FromSeconds(47) : Current.PositionAt(now));
+        _seekTo = null;
 
         Current = new MediaSnapshot(track.Title, track.Artist, "Demo Player", art, _playing, true, true, true)
         {
             Duration = TimeSpan.FromSeconds(223),
             Position = position,
             PositionTimestamp = now,
+            CanSeek = true,
         };
         Changed?.Invoke(this, EventArgs.Empty);
     }

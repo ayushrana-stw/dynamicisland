@@ -18,6 +18,18 @@ In VS Code, press **F5** (install the recommended extensions when prompted).
 - **Esc** collapses it. Tab moves between the controls.
 - Settings and Exit are in the system tray icon menu.
 
+## What it does
+
+- **Media**: artwork, title, controls, a progress bar you can drag to seek, long titles that scroll,
+  colours taken from the album art. Hover the compact island to see the title.
+- **Notifications** from any app (see setup below), with a history list (bell button) and per-app mute.
+- **Volume and brightness**: change either and the island becomes a level bar.
+- **Battery**: a green flash when you plug in, a warning at 20% and 10%.
+- **Microphone / camera indicator**: an orange (mic) or green (camera) bubble while any app uses them.
+- **Timer and stopwatch**: presets from 1 minute to 1 hour; the countdown rides along in a side bubble
+  while music plays (the "split island").
+- Everything is configurable in Settings, and everything stays on your device.
+
 ## Notifications (Windows, one-time setup)
 
 Windows only lets apps with a *package identity* read other apps' notifications. To give the
@@ -55,4 +67,5 @@ Re-run the script if you move the build folder or switch to a Release build
 
 - `--demo` shows a fake player with generated artwork.
 - `--snapshot <folder>` renders the island's compact and expanded states to PNGs and exits.
+- Set `DYNAMIC_ISLAND_DEBUG=1` to write a troubleshooting log to `debug.log` next to the settings file.
 - Crashes are written to `%LocalAppData%\DynamicIsland\crash.log` (macOS: `~/Library/Application Support/DynamicIsland/crash.log`).

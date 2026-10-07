@@ -1,68 +1,105 @@
 using Avalonia;
-using Avalonia.Media;
-using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using DynamicIsland.Core.Media;
 using DynamicIsland.Core.Notifications;
 using DynamicIsland.Core.Settings;
+using DynamicIsland.Core.SystemStatus;
 
 namespace DynamicIsland.App.ViewModels;
 
+/// <summary>What the island is showing right now. Exactly one mode is active.</summary>
+public enum IslandMode
+{
+    CompactIdle,
+    CompactMedia,
+    CompactTimer,
+    Hud,
+    ExpandedIdle,
+    ExpandedMedia,
+    ExpandedNotification,
+    ExpandedHistory,
+    ExpandedTimerPicker,
+    ExpandedTimer,
+}
+
+/// <summary>A page the user navigated to inside the expanded island.</summary>
+internal enum ExpandedPage
+{
+    Auto,
+    History,
+    TimerPicker,
+    Timer,
+}
+
+/// <summary>
+/// The island's state. Split into partial files by feature:
+/// Media, Notifications (+ history), System (volume/brightness/battery/privacy) and Timer.
+/// </summary>
 public sealed partial class IslandViewModel : ObservableObject, IDisposable
 {
-    // Island sizes in device-independent pixels. The window is sized to fit the largest one.
-    public const double MaxWidth = 400;
-    public const double MaxHeight = 186;
+    // The window is sized to fit the largest island plus the side bubble.
+    public const double MaxWidth = 440;
+    public const double MaxHeight = 300;
 
-    /// <summary>Width of the progress track in the expanded media view.</summary>
-    public const double ProgressTrackWidth = 232;
+    private const double BubbleSize = 34;
+    private const double BubbleGap = 8;
 
-    private static readonly Size CompactIdleSize = new(128, 34);
-    private static readonly Size CompactMediaSize = new(236, 34);
-    private static readonly Size ExpandedIdleSize = new(300, 74);
-    private static readonly Size ExpandedMediaSize = new(372, 156);
-    private static readonly Size ExpandedMediaWithTimelineSize = new(372, 184);
-    private static readonly Size ExpandedNotificationSize = new(372, 116);
-
-    // After the user presses play/pause, show the new state at once and ignore stale reports for a moment.
-    private static readonly TimeSpan OptimisticWindow = TimeSpan.FromMilliseconds(1500);
+    private static readonly string[] ModeProperties =
+    [
+        nameof(ShowCompactIdle), nameof(ShowCompactMedia), nameof(ShowCompactTimer), nameof(ShowHud),
+        nameof(ShowExpandedIdle), nameof(ShowExpandedMedia), nameof(ShowExpandedNotification),
+        nameof(ShowExpandedHistory), nameof(ShowExpandedTimerPicker), nameof(ShowExpandedTimer),
+        nameof(IsCompact), nameof(ShowBubble), nameof(BubbleShowsTimer), nameof(BubbleShowsPrivacy),
+        nameof(ShowPrivacyDot), nameof(ShowHoverTitle), nameof(ShowHoverClock),
+    ];
 
     private readonly SettingsService _settings;
-    private readonly IMediaService _media;
-    private readonly INotificationService _notifications;
-    private readonly List<IslandNotification> _notificationQueue = [];
     private readonly DispatcherTimer _collapseTimer;
     private readonly DispatcherTimer _tickTimer;
+    private readonly DispatcherTimer _hoverTimer;
 
-    private MediaSnapshot? _snapshot;
-    private string? _trackKey;
-    private byte[]? _artworkData;
-    private Color _artworkAccent = ArtworkLoader.DefaultAccent;
+    private ExpandedPage _page;
     private bool _pointerInside;
     private int _actionsInProgress;
-    private (bool IsPlaying, DateTime Until)? _optimisticPlayState;
 
-    public IslandViewModel(SettingsService settings, IMediaService media, INotificationService notifications)
+    public IslandViewModel(SettingsService settings, IMediaService media, INotificationService notifications, ISystemStatusService system)
     {
         _settings = settings;
         _media = media;
         _notifications = notifications;
+        _system = system;
 
         _collapseTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(settings.Current.AutoCollapseSeconds) };
         _collapseTimer.Tick += (_, _) => TryAutoCollapse();
 
-        // Drives the clock and progress bar; runs only while the island is expanded.
+        // Drives the clock, progress bar and timer; runs only while one of them is on screen.
         _tickTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
         _tickTimer.Tick += (_, _) => Tick();
+
+        // A short delay so the island does not twitch when the mouse just passes over it.
+        _hoverTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(220) };
+        _hoverTimer.Tick += (_, _) =>
+        {
+            _hoverTimer.Stop();
+            IsHovering = !IsExpanded && Settings.HoverPreview;
+        };
+
+        _hudTimer = new DispatcherTimer();
+        _hudTimer.Tick += (_, _) => HideHud();
 
         _settings.Changed += OnSettingsChanged;
         _media.Changed += OnMediaChanged;
         _notifications.Received += OnNotificationReceived;
+        _system.VolumeChanged += OnVolumeChanged;
+        _system.BrightnessChanged += OnBrightnessChanged;
+        _system.PowerChanged += OnPowerChanged;
+        _system.PrivacyChanged += OnPrivacyChanged;
 
         ApplyAccent();
         ApplyMedia(_media.Current);
+        ApplyPrivacy();
         UpdateShape();
     }
 
@@ -77,62 +114,106 @@ public sealed partial class IslandViewModel : ObservableObject, IDisposable
 
     public IslandSettings Settings => _settings.Current;
 
-    // ---- State -------------------------------------------------------------------------------
+    // ---- Shape and mode ----------------------------------------------------------------------
 
     [ObservableProperty] public partial bool IsExpanded { get; private set; }
-    [ObservableProperty] public partial bool HasMedia { get; private set; }
+    [ObservableProperty] public partial bool IsHovering { get; private set; }
     [ObservableProperty] public partial bool HasUnseenActivity { get; private set; }
+    [ObservableProperty] public partial IslandMode Mode { get; private set; }
 
     [ObservableProperty] public partial double IslandWidth { get; private set; }
     [ObservableProperty] public partial double IslandHeight { get; private set; }
     [ObservableProperty] public partial CornerRadius IslandCornerRadius { get; private set; }
 
-    public bool ShowCompactIdle => !IsExpanded && !HasMedia;
-    public bool ShowCompactMedia => !IsExpanded && HasMedia;
-    public bool ShowExpandedIdle => IsExpanded && !HasNotification && !HasMedia;
-    public bool ShowExpandedMedia => IsExpanded && !HasNotification && HasMedia;
-    public bool ShowExpandedNotification => IsExpanded && HasNotification;
+    /// <summary>Places the side bubble just right of the island (the island is centred).</summary>
+    [ObservableProperty] public partial Thickness BubbleMargin { get; private set; }
 
-    // Only visible animations run; the collapsed, idle island renders nothing at all.
-    public bool AnimateCompactVisualizer => ShowCompactMedia && IsPlaying && Settings.AnimatedVisualizer;
-    public bool AnimateExpandedVisualizer => ShowExpandedMedia && IsPlaying && Settings.AnimatedVisualizer;
-    public bool ShowAmbientGlow => ShowExpandedMedia && IsPlaying && Settings.TintFromArtwork;
+    public bool ShowCompactIdle => Mode == IslandMode.CompactIdle;
+    public bool ShowCompactMedia => Mode == IslandMode.CompactMedia;
+    public bool ShowCompactTimer => Mode == IslandMode.CompactTimer;
+    public bool ShowHud => Mode == IslandMode.Hud;
+    public bool ShowExpandedIdle => Mode == IslandMode.ExpandedIdle;
+    public bool ShowExpandedMedia => Mode == IslandMode.ExpandedMedia;
+    public bool ShowExpandedNotification => Mode == IslandMode.ExpandedNotification;
+    public bool ShowExpandedHistory => Mode == IslandMode.ExpandedHistory;
+    public bool ShowExpandedTimerPicker => Mode == IslandMode.ExpandedTimerPicker;
+    public bool ShowExpandedTimer => Mode == IslandMode.ExpandedTimer;
+    public bool IsCompact => Mode is IslandMode.CompactIdle or IslandMode.CompactMedia or IslandMode.CompactTimer;
 
-    // ---- Media -------------------------------------------------------------------------------
+    public bool ShowHoverTitle => ShowCompactMedia && IsHovering;
+    public bool ShowHoverClock => ShowCompactIdle && IsHovering;
 
-    [ObservableProperty] public partial string MediaTitle { get; private set; } = "";
-    [ObservableProperty] public partial string MediaArtist { get; private set; } = "";
-    [ObservableProperty] public partial string MediaApp { get; private set; } = "";
-    [ObservableProperty] public partial Bitmap? Artwork { get; private set; }
-    [ObservableProperty] public partial bool IsPlaying { get; private set; }
-    [ObservableProperty] public partial bool CanPlayPause { get; private set; }
-    [ObservableProperty] public partial bool CanGoNext { get; private set; }
-    [ObservableProperty] public partial bool CanGoPrevious { get; private set; }
-    [ObservableProperty] public partial Color AccentColor { get; private set; } = ArtworkLoader.DefaultAccent;
-    [ObservableProperty] public partial IBrush AccentBrush { get; private set; } = new SolidColorBrush(ArtworkLoader.DefaultAccent);
-    [ObservableProperty] public partial IBrush? GlowBrush { get; private set; }
+    // The split island: a separate bubble for a second activity while the island is compact.
+    public bool BubbleShowsTimer => ShowCompactMedia && TimerActive;
+    public bool BubbleShowsPrivacy => IsCompact && !BubbleShowsTimer && ShowPrivacy;
+    public bool ShowBubble => BubbleShowsTimer || BubbleShowsPrivacy;
 
-    public bool HasArtwork => Artwork is not null;
-    public bool IsPaused => !IsPlaying;
+    /// <summary>Small privacy dot inside the pill when the bubble is busy with something else.</summary>
+    public bool ShowPrivacyDot => IsCompact && ShowPrivacy && !BubbleShowsPrivacy;
 
-    // ---- Progress ----------------------------------------------------------------------------
+    /// <summary>Width the window must keep interactive to the right of the island for the bubble.</summary>
+    public double BubbleExtent => ShowBubble ? BubbleGap + BubbleSize : 0;
 
-    [ObservableProperty] public partial bool HasTimeline { get; private set; }
-    [ObservableProperty] public partial double ProgressWidth { get; private set; }
-    [ObservableProperty] public partial string ElapsedText { get; private set; } = "";
-    [ObservableProperty] public partial string RemainingText { get; private set; } = "";
+    private IslandMode ComputeMode()
+    {
+        if (!IsExpanded)
+        {
+            if (HudVisible)
+                return IslandMode.Hud;
+            if (HasMedia)
+                return IslandMode.CompactMedia;
+            return TimerActive ? IslandMode.CompactTimer : IslandMode.CompactIdle;
+        }
 
-    /// <summary>False for one update after a jump (new track or seek) so the bar snaps instead of sliding back.</summary>
-    [ObservableProperty] public partial bool ProgressSmooth { get; private set; }
+        if (HasNotification)
+            return IslandMode.ExpandedNotification;
 
-    public double ExpandedMediaHeight => HasTimeline ? ExpandedMediaWithTimelineSize.Height : ExpandedMediaSize.Height;
+        return _page switch
+        {
+            ExpandedPage.History => IslandMode.ExpandedHistory,
+            ExpandedPage.TimerPicker => IslandMode.ExpandedTimerPicker,
+            ExpandedPage.Timer when TimerActive => IslandMode.ExpandedTimer,
+            _ when TimerFinished => IslandMode.ExpandedTimer,
+            _ when HasMedia => IslandMode.ExpandedMedia,
+            _ when TimerActive => IslandMode.ExpandedTimer,
+            _ => IslandMode.ExpandedIdle,
+        };
+    }
 
-    // ---- Idle content -----------------------------------------------------------------------
+    private Size SizeFor(IslandMode mode) => mode switch
+    {
+        IslandMode.CompactIdle => IsHovering ? new Size(196, 34) : new Size(128, 34),
+        IslandMode.CompactMedia => IsHovering ? new Size(340, 34) : new Size(236, 34),
+        IslandMode.CompactTimer => new Size(206, 34),
+        IslandMode.Hud => new Size(300, 34),
+        IslandMode.ExpandedIdle => new Size(340, 118),
+        IslandMode.ExpandedMedia => HasTimeline ? new Size(372, 190) : new Size(372, 156),
+        IslandMode.ExpandedNotification => new Size(372, 116),
+        IslandMode.ExpandedHistory => new Size(372, HistoryHeight),
+        IslandMode.ExpandedTimerPicker => new Size(372, 160),
+        IslandMode.ExpandedTimer => new Size(372, 132),
+        _ => new Size(128, 34),
+    };
 
-    [ObservableProperty] public partial string ClockText { get; private set; } = "";
-    [ObservableProperty] public partial string DateText { get; private set; } = "";
+    private void UpdateShape()
+    {
+        Mode = ComputeMode();
+        var size = SizeFor(Mode);
 
-    // ---- Interaction -------------------------------------------------------------------------
+        IslandWidth = size.Width;
+        IslandHeight = size.Height;
+        IslandCornerRadius = new CornerRadius(IsCompact || Mode == IslandMode.Hud ? size.Height / 2 : 38);
+        BubbleMargin = new Thickness(size.Width + 2 * BubbleGap + BubbleSize, 4, 0, 0);
+
+        foreach (var property in ModeProperties)
+            OnPropertyChanged(property);
+        OnPropertyChanged(nameof(BubbleExtent));
+
+        NotifyAnimations();
+        UpdateTicker();
+    }
+
+    // ---- Expand / collapse ---------------------------------------------------------------------
 
     [RelayCommand]
     public void ToggleExpanded()
@@ -147,16 +228,23 @@ public sealed partial class IslandViewModel : ObservableObject, IDisposable
     public void Collapse()
     {
         _collapseTimer.Stop();
+        _page = ExpandedPage.Auto;
         IsExpanded = false;
 
-        // Seen notifications leave the island (they stay in the Windows notification centre).
+        // Seen notifications leave the island (history and Windows' notification centre keep them).
         _notificationQueue.Clear();
         HasNotification = false;
+
+        if (TimerFinished)
+            StopTimer();
+
+        UpdateShape();
     }
 
     public void Expand(bool peek)
     {
         HasUnseenActivity = false;
+        IsHovering = false;
         IsExpanded = true;
 
         // A peek (triggered by an event, not the user) closes on its own unless the user engages.
@@ -164,125 +252,36 @@ public sealed partial class IslandViewModel : ObservableObject, IDisposable
             RestartCollapseTimer();
     }
 
-    // ---- Notifications -----------------------------------------------------------------------
-
-    [ObservableProperty] public partial bool HasNotification { get; private set; }
-    [ObservableProperty] public partial string NotificationApp { get; private set; } = "";
-    [ObservableProperty] public partial string NotificationTitle { get; private set; } = "";
-    [ObservableProperty] public partial string NotificationBody { get; private set; } = "";
-    [ObservableProperty] public partial Bitmap? NotificationIcon { get; private set; }
-    [ObservableProperty] public partial string NotificationMoreText { get; private set; } = "";
-
-    public bool HasNotificationIcon => NotificationIcon is not null;
-    public bool HasNotificationBody => NotificationBody.Length > 0;
-    public bool HasMoreNotifications => NotificationMoreText.Length > 0;
-    public string MuteAppToolTip => $"Don't show notifications from {NotificationApp}";
-
-    private IslandNotification? CurrentNotification => _notificationQueue.LastOrDefault();
-
-    private void OnNotificationReceived(object? sender, IslandNotification notification) =>
-        Dispatcher.UIThread.Post(() => ShowNotification(notification));
-
-    /// <summary>Shows a notification; also used by the <c>--demo</c> mode.</summary>
-    public void ShowNotification(IslandNotification notification)
+    /// <summary>Shows a page inside the expanded island, expanding it if needed.</summary>
+    private void NavigateTo(ExpandedPage page)
     {
-        if (!Settings.ShowNotifications || Settings.IsMuted(notification.AppName))
-            return;
+        _page = page;
+        _notificationQueue.Clear();
+        HasNotification = false;
 
-        _notificationQueue.Add(notification);
-        if (_notificationQueue.Count > 20)
-            _notificationQueue.RemoveAt(0);
-
-        PresentCurrentNotification();
-        NotificationArrived?.Invoke(this, EventArgs.Empty);
-
-        if (Settings.ExpandOnNotification || IsExpanded)
-        {
-            Expand(peek: true);
-            if (!_pointerInside)
-                RestartCollapseTimer(extraSeconds: 2);
-        }
-        else
-        {
-            HasUnseenActivity = true;
-        }
-    }
-
-    private void PresentCurrentNotification()
-    {
-        var current = CurrentNotification;
-        HasNotification = current is not null;
-        if (current is null)
-            return;
-
-        var hidePreview = Settings.HideNotificationPreviews;
-        NotificationApp = current.AppName;
-        NotificationTitle = hidePreview ? "New notification" : current.Title;
-        NotificationBody = hidePreview ? "" : current.Body;
-
-        var (icon, _) = ArtworkLoader.Load(current.AppIcon);
-        var old = NotificationIcon;
-        NotificationIcon = icon;
-        if (old is not null)
-            DispatcherTimer.RunOnce(old.Dispose, TimeSpan.FromSeconds(1));
-
-        var more = _notificationQueue.Count - 1;
-        NotificationMoreText = more > 0 ? $"+{more} more" : "";
-        OnPropertyChanged(nameof(HasNotificationBody));
-        OnPropertyChanged(nameof(HasMoreNotifications));
-        OnPropertyChanged(nameof(MuteAppToolTip));
+        if (!IsExpanded)
+            Expand(peek: false);
+        UpdateShape();
     }
 
     [RelayCommand]
-    private void OpenNotification()
-    {
-        if (CurrentNotification is { } notification)
-            _notifications.OpenApp(notification);
-
-        Collapse();
-    }
-
-    /// <summary>Removes the notification from Windows too, then shows the previous one or closes.</summary>
-    [RelayCommand]
-    private async Task DismissNotification()
-    {
-        if (CurrentNotification is not { } notification)
-            return;
-
-        _notificationQueue.Remove(notification);
-        if (_notificationQueue.Count == 0)
-            Collapse();
-        else
-            PresentCurrentNotification();
-
-        await _notifications.DismissAsync(notification);
-    }
-
-    [RelayCommand]
-    private void MuteNotificationApp()
-    {
-        if (CurrentNotification is not { } notification)
-            return;
-
-        if (!Settings.IsMuted(notification.AppName))
-            _settings.Update(Settings with { MutedNotificationApps = [.. Settings.MutedNotificationApps, notification.AppName] });
-
-        _notificationQueue.RemoveAll(n => n.AppName.Equals(notification.AppName, StringComparison.OrdinalIgnoreCase));
-        if (_notificationQueue.Count == 0)
-            Collapse();
-        else
-            PresentCurrentNotification();
-    }
+    private void Back() => NavigateTo(ExpandedPage.Auto);
 
     public void OnPointerEntered()
     {
         _pointerInside = true;
         _collapseTimer.Stop();
+
+        if (!IsExpanded && Settings.HoverPreview)
+            _hoverTimer.Start();
     }
 
     public void OnPointerExited()
     {
         _pointerInside = false;
+        _hoverTimer.Stop();
+        IsHovering = false;
+
         if (IsExpanded)
             RestartCollapseTimer();
     }
@@ -292,41 +291,6 @@ public sealed partial class IslandViewModel : ObservableObject, IDisposable
     {
         Collapse();
         SettingsRequested?.Invoke(this, EventArgs.Empty);
-    }
-
-    [RelayCommand(CanExecute = nameof(CanPlayPause))]
-    private Task PlayPause()
-    {
-        // Flip the icon immediately; the player's confirmation arrives a moment later.
-        _optimisticPlayState = (!IsPlaying, DateTime.UtcNow + OptimisticWindow);
-        IsPlaying = !IsPlaying;
-        UpdateProgress(smooth: false);
-        return RunMediaAction(_media.TogglePlayPauseAsync);
-    }
-
-    [RelayCommand(CanExecute = nameof(CanGoNext))]
-    private Task Next() => RunMediaAction(_media.NextAsync);
-
-    [RelayCommand(CanExecute = nameof(CanGoPrevious))]
-    private Task Previous() => RunMediaAction(_media.PreviousAsync);
-
-    private async Task RunMediaAction(Func<Task> action)
-    {
-        _actionsInProgress++;
-        try
-        {
-            await action();
-        }
-        catch (Exception)
-        {
-            // The player may have closed between the click and the call; the next update corrects the UI.
-            _optimisticPlayState = null;
-            ApplyMedia(_media.Current);
-        }
-        finally
-        {
-            _actionsInProgress--;
-        }
     }
 
     private void RestartCollapseTimer(double extraSeconds = 0)
@@ -344,151 +308,24 @@ public sealed partial class IslandViewModel : ObservableObject, IDisposable
         Collapse();
     }
 
-    // ---- Updates -----------------------------------------------------------------------------
+    // ---- Ticking -------------------------------------------------------------------------------
 
-    private void OnSettingsChanged(object? sender, IslandSettings settings)
+    [ObservableProperty] public partial string ClockText { get; private set; } = "";
+    [ObservableProperty] public partial string DateText { get; private set; } = "";
+
+    /// <summary>The 1-second ticker runs only while something time-based is on screen.</summary>
+    private void UpdateTicker()
     {
-        OnPropertyChanged(nameof(Settings));
-        ApplyAccent();
-        ApplyMedia(_media.Current);
-        NotifyAnimations();
-    }
-
-    private void OnMediaChanged(object? sender, EventArgs e) =>
-        Dispatcher.UIThread.Post(() => ApplyMedia(_media.Current));
-
-    private void ApplyMedia(MediaSnapshot? media)
-    {
-        if (!Settings.ShowMedia)
-            media = null;
-
-        var previousKey = _trackKey;
-        _snapshot = media;
-        HasMedia = media is not null;
-
-        if (media is null)
+        var needed = IsExpanded || TimerActive || ShowHoverClock;
+        if (needed && !_tickTimer.IsEnabled)
         {
-            _trackKey = null;
-            _optimisticPlayState = null;
-            IsPlaying = false;
-            HasTimeline = false;
-            return;
+            Tick();
+            _tickTimer.Start();
         }
-
-        MediaTitle = string.IsNullOrWhiteSpace(media.Title) ? "Unknown title" : media.Title;
-        MediaArtist = media.Artist;
-        MediaApp = media.AppName;
-        CanPlayPause = media.CanPlayPause;
-        CanGoNext = media.CanGoNext;
-        CanGoPrevious = media.CanGoPrevious;
-        _trackKey = media.TrackKey;
-
-        // Keep the optimistic state until the player agrees or the window expires.
-        if (_optimisticPlayState is { } pending && DateTime.UtcNow < pending.Until && media.IsPlaying != pending.IsPlaying)
-            IsPlaying = pending.IsPlaying;
-        else
+        else if (!needed)
         {
-            _optimisticPlayState = null;
-            IsPlaying = media.IsPlaying;
+            _tickTimer.Stop();
         }
-
-        if (!ReferenceEquals(media.Artwork, _artworkData))
-        {
-            _artworkData = media.Artwork;
-            var (image, accent) = ArtworkLoader.Load(media.Artwork);
-            ReplaceArtwork(image);
-            _artworkAccent = accent;
-            ApplyAccent();
-        }
-
-        var trackChanged = previousKey is not null && previousKey != _trackKey;
-        HasTimeline = media.Duration is not null;
-        UpdateProgress(smooth: !trackChanged && previousKey is not null);
-
-        if (trackChanged)
-        {
-            TrackChanged?.Invoke(this, EventArgs.Empty);
-
-            // Briefly show a new track, the way iOS does.
-            if (!IsExpanded)
-            {
-                if (Settings.ExpandOnTrackChange)
-                    Expand(peek: true);
-                else
-                    HasUnseenActivity = true;
-            }
-        }
-    }
-
-    /// <summary>Swaps artwork, disposing the old image only after the cross-fade has finished with it.</summary>
-    private void ReplaceArtwork(Bitmap? image)
-    {
-        var old = Artwork;
-        Artwork = image;
-        if (old is not null)
-            DispatcherTimer.RunOnce(old.Dispose, TimeSpan.FromSeconds(1));
-    }
-
-    private void ApplyAccent()
-    {
-        AccentColor = Settings.TintFromArtwork ? _artworkAccent : ArtworkLoader.DefaultAccent;
-        AccentBrush = new SolidColorBrush(AccentColor);
-
-        // A soft pool of the artwork's colour behind the album art.
-        GlowBrush = new RadialGradientBrush
-        {
-            Center = new RelativePoint(0.16, 0.3, RelativeUnit.Relative),
-            GradientOrigin = new RelativePoint(0.16, 0.3, RelativeUnit.Relative),
-            RadiusX = new RelativeScalar(0.55, RelativeUnit.Relative),
-            RadiusY = new RelativeScalar(1.0, RelativeUnit.Relative),
-            GradientStops =
-            {
-                new GradientStop(Color.FromArgb(0x60, AccentColor.R, AccentColor.G, AccentColor.B), 0),
-                new GradientStop(Color.FromArgb(0x1C, AccentColor.R, AccentColor.G, AccentColor.B), 0.55),
-                new GradientStop(Color.FromArgb(0x00, AccentColor.R, AccentColor.G, AccentColor.B), 1),
-            },
-        };
-    }
-
-    private void UpdateProgress(bool smooth)
-    {
-        if (_snapshot?.Duration is not { } duration)
-            return;
-
-        var position = _snapshot.PositionAt(DateTimeOffset.Now);
-        var width = ProgressTrackWidth * Math.Clamp(position / duration, 0, 1);
-
-        // Large jumps (seek, new track) snap; normal ticks glide for one second.
-        ProgressSmooth = smooth && Math.Abs(width - ProgressWidth) < ProgressTrackWidth * 0.1;
-        ProgressWidth = width;
-        ElapsedText = Format(position);
-        RemainingText = "-" + Format(duration - position);
-    }
-
-    private static string Format(TimeSpan time) =>
-        time.TotalHours >= 1 ? time.ToString(@"h\:mm\:ss") : time.ToString(@"m\:ss");
-
-    private void UpdateShape()
-    {
-        var size = (IsExpanded, HasMedia) switch
-        {
-            (true, _) when HasNotification => ExpandedNotificationSize,
-            (true, true) => HasTimeline ? ExpandedMediaWithTimelineSize : ExpandedMediaSize,
-            (true, false) => ExpandedIdleSize,
-            (false, true) => CompactMediaSize,
-            (false, false) => CompactIdleSize,
-        };
-
-        IslandWidth = size.Width;
-        IslandHeight = size.Height;
-        IslandCornerRadius = new CornerRadius(IsExpanded ? (HasMedia || HasNotification ? 40 : 30) : size.Height / 2);
-
-        OnPropertyChanged(nameof(ShowCompactIdle));
-        OnPropertyChanged(nameof(ShowCompactMedia));
-        OnPropertyChanged(nameof(ShowExpandedIdle));
-        OnPropertyChanged(nameof(ShowExpandedMedia));
-        OnPropertyChanged(nameof(ShowExpandedNotification));
-        NotifyAnimations();
     }
 
     private void Tick()
@@ -499,59 +336,57 @@ public sealed partial class IslandViewModel : ObservableObject, IDisposable
 
         if (ShowExpandedMedia && IsPlaying)
             UpdateProgress(smooth: true);
+
+        TickTimer();
+    }
+
+    // ---- Settings ------------------------------------------------------------------------------
+
+    private void OnSettingsChanged(object? sender, IslandSettings settings)
+    {
+        OnPropertyChanged(nameof(Settings));
+        ApplyAccent();
+        ApplyMedia(_media.Current);
+        ApplyPrivacy();
+        UpdateShape();
     }
 
     partial void OnIsExpandedChanged(bool value)
     {
-        UpdateShape();
-
-        // The ticker only runs while its output is visible, so the collapsed island does no work at all.
         if (value)
         {
+            HideHud();
             UpdateProgress(smooth: false);
-            Tick();
-            _tickTimer.Start();
+            RefreshHistoryTimes();
         }
-        else
-        {
-            _tickTimer.Stop();
-        }
-    }
 
-    partial void OnHasMediaChanged(bool value) => UpdateShape();
-    partial void OnHasNotificationChanged(bool value) => UpdateShape();
-    partial void OnNotificationIconChanged(Bitmap? value) => OnPropertyChanged(nameof(HasNotificationIcon));
-    partial void OnHasTimelineChanged(bool value)
-    {
-        OnPropertyChanged(nameof(ExpandedMediaHeight));
         UpdateShape();
     }
 
-    partial void OnIsPlayingChanged(bool value)
-    {
-        OnPropertyChanged(nameof(IsPaused));
-        NotifyAnimations();
-    }
+    partial void OnIsHoveringChanged(bool value) => UpdateShape();
 
     private void NotifyAnimations()
     {
         OnPropertyChanged(nameof(AnimateCompactVisualizer));
         OnPropertyChanged(nameof(AnimateExpandedVisualizer));
         OnPropertyChanged(nameof(ShowAmbientGlow));
+        OnPropertyChanged(nameof(AnimateMarquee));
+        OnPropertyChanged(nameof(AnimateHoverMarquee));
     }
-
-    partial void OnArtworkChanged(Bitmap? value) => OnPropertyChanged(nameof(HasArtwork));
-    partial void OnCanPlayPauseChanged(bool value) => PlayPauseCommand.NotifyCanExecuteChanged();
-    partial void OnCanGoNextChanged(bool value) => NextCommand.NotifyCanExecuteChanged();
-    partial void OnCanGoPreviousChanged(bool value) => PreviousCommand.NotifyCanExecuteChanged();
 
     public void Dispose()
     {
         _collapseTimer.Stop();
         _tickTimer.Stop();
+        _hoverTimer.Stop();
+        _hudTimer.Stop();
         _settings.Changed -= OnSettingsChanged;
         _media.Changed -= OnMediaChanged;
         _notifications.Received -= OnNotificationReceived;
+        _system.VolumeChanged -= OnVolumeChanged;
+        _system.BrightnessChanged -= OnBrightnessChanged;
+        _system.PowerChanged -= OnPowerChanged;
+        _system.PrivacyChanged -= OnPrivacyChanged;
         Artwork?.Dispose();
         NotificationIcon?.Dispose();
     }

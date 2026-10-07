@@ -20,6 +20,9 @@ public sealed record MediaSnapshot(
 
     public DateTimeOffset PositionTimestamp { get; init; }
 
+    /// <summary>True when the player accepts <see cref="IMediaService.SeekAsync"/>.</summary>
+    public bool CanSeek { get; init; }
+
     /// <summary>Identifies the track; changes when the song changes but not on play/pause.</summary>
     public string TrackKey => $"{AppName}\u001f{Title}\u001f{Artist}";
 
@@ -46,6 +49,7 @@ public interface IMediaService : IDisposable
     Task TogglePlayPauseAsync();
     Task NextAsync();
     Task PreviousAsync();
+    Task SeekAsync(TimeSpan position);
 }
 
 /// <summary>Used on platforms without media integration yet.</summary>
@@ -57,5 +61,6 @@ public sealed class NullMediaService : IMediaService
     public Task TogglePlayPauseAsync() => Task.CompletedTask;
     public Task NextAsync() => Task.CompletedTask;
     public Task PreviousAsync() => Task.CompletedTask;
+    public Task SeekAsync(TimeSpan position) => Task.CompletedTask;
     public void Dispose() { }
 }

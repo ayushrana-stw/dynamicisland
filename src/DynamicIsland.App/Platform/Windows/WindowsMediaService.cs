@@ -34,6 +34,16 @@ internal sealed class WindowsMediaService : IMediaService
     public Task NextAsync() => _session?.TrySkipNextAsync().AsTask() ?? Task.CompletedTask;
     public Task PreviousAsync() => _session?.TrySkipPreviousAsync().AsTask() ?? Task.CompletedTask;
 
+    public Task SeekAsync(TimeSpan position)
+    {
+        if (_session is not { } session)
+            return Task.CompletedTask;
+
+        // Positions are relative to the timeline's start, which is usually zero.
+        var start = session.GetTimelineProperties()?.StartTime ?? TimeSpan.Zero;
+        return session.TryChangePlaybackPositionAsync((start + position).Ticks).AsTask();
+    }
+
     private void OnCurrentSessionChanged(SessionManager sender, CurrentSessionChangedEventArgs args) =>
         _ = AttachToCurrentSessionAsync();
 
@@ -149,6 +159,7 @@ internal sealed class WindowsMediaService : IMediaService
             Duration = duration > TimeSpan.FromSeconds(1) ? duration : null,
             Position = timeline is null ? TimeSpan.Zero : timeline.Position - timeline.StartTime,
             PositionTimestamp = timeline is null || timeline.LastUpdatedTime.Year < 2000 ? DateTimeOffset.Now : timeline.LastUpdatedTime,
+            CanSeek = controls.IsPlaybackPositionEnabled,
         };
     }
 
