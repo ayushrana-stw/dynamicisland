@@ -1,0 +1,26 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Dynamic Island",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/src/DynamicIsland.App/bin/Debug/net9.0-windows10.0.19041.0/DynamicIsland.exe",
+      "osx": { "program": "${workspaceFolder}/src/DynamicIsland.App/bin/Debug/net9.0/DynamicIsland" },
+      "cwd": "${workspaceFolder}",
+      "console": "internalConsole"
+    },
+    {
+      "name": "Dynamic Island (demo track)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/src/DynamicIsland.App/bin/Debug/net9.0-windows10.0.19041.0/DynamicIsland.exe",
+      "osx": { "program": "${workspaceFolder}/src/DynamicIsland.App/bin/Debug/net9.0/DynamicIsland" },
+      "args": ["--demo"],
+      "cwd": "${workspaceFolder}",
+      "console": "internalConsole"
+    }
+  ]
+}

@@ -1,0 +1,432 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="using:DynamicIsland.App.Controls">
+
+  <Styles.Resources>
+    <SolidColorBrush x:Key="IslandBackground" Color="#000000" />
+    <SolidColorBrush x:Key="IslandOutline" Color="#1CFFFFFF" />
+    <SolidColorBrush x:Key="IslandPrimaryText" Color="#FFFFFFFF" />
+    <SolidColorBrush x:Key="IslandSecondaryText" Color="#99EBEBF5" />
+    <SolidColorBrush x:Key="IslandTertiaryText" Color="#59EBEBF5" />
+    <SolidColorBrush x:Key="IslandControlHover" Color="#1FFFFFFF" />
+    <SolidColorBrush x:Key="IslandControlPressed" Color="#33FFFFFF" />
+    <SolidColorBrush x:Key="IslandPlaceholder" Color="#2C2C2E" />
+    <FontFamily x:Key="IslandFont">Segoe UI Variable Display, Segoe UI, SF Pro Display, Helvetica Neue, Inter</FontFamily>
+
+    <StreamGeometry x:Key="IconPlay">M8 5.14v13.72a1 1 0 0 0 1.52.85l10.98-6.86a1 1 0 0 0 0-1.7L9.52 4.29A1 1 0 0 0 8 5.14z</StreamGeometry>
+    <StreamGeometry x:Key="IconPause">M7 4.5h3a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-13a1 1 0 0 1 1-1zm7 0h3a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-3a1 1 0 0 1-1-1v-13a1 1 0 0 1 1-1z</StreamGeometry>
+    <StreamGeometry x:Key="IconNext">M3 6.2v11.6a1 1 0 0 0 1.53.85L12 13.9v3.9a1 1 0 0 0 1.53.85l8-5.8a1 1 0 0 0 0-1.7l-8-5.8A1 1 0 0 0 12 6.2v3.9L4.53 5.35A1 1 0 0 0 3 6.2z</StreamGeometry>
+    <StreamGeometry x:Key="IconPrevious">M21 6.2v11.6a1 1 0 0 1-1.53.85L12 13.9v3.9a1 1 0 0 1-1.53.85l-8-5.8a1 1 0 0 1 0-1.7l8-5.8A1 1 0 0 1 12 6.2v3.9l7.47-4.75A1 1 0 0 1 21 6.2z</StreamGeometry>
+    <StreamGeometry x:Key="IconSettings">M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.48.48 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.48.48 0 0 0-.59.22L2.74 8.87a.47.47 0 0 0 .12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.48.48 0 0 0-.12-.61l-2.01-1.58zM12 15.6a3.6 3.6 0 1 1 0-7.2 3.6 3.6 0 0 1 0 7.2z</StreamGeometry>
+    <StreamGeometry x:Key="IconMusic">M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z</StreamGeometry>
+    <StreamGeometry x:Key="IconClose">M6.4 5 5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12 19 6.4 17.6 5 12 10.6z</StreamGeometry>
+    <StreamGeometry x:Key="IconOpen">M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7zm5 16H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7z</StreamGeometry>
+    <StreamGeometry x:Key="IconMute">M20 18.69 7.84 6.14 5.27 3.49 4 4.76l2.8 2.8v.01c-.52.99-.8 2.16-.8 3.42v5l-2 2v1h13.73l2 2L21 19.72l-1-1.03zM12 22c1.11 0 2-.89 2-2h-4c0 1.11.89 2 2 2zm6-7.32V11c0-3.08-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68c-.15.03-.29.08-.42.12-.1.03-.2.07-.3.11h-.01c-.01 0-.01 0-.02.01-.23.09-.46.2-.68.31 0 0-.01 0-.01.01L18 14.68z</StreamGeometry>
+    <StreamGeometry x:Key="IconBell">M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4a1.5 1.5 0 0 0-3 0v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z</StreamGeometry>
+  </Styles.Resources>
+
+  <!-- ===== Island shell ===== -->
+
+  <Style Selector="Border.island">
+    <Setter Property="Background" Value="{StaticResource IslandBackground}" />
+    <Setter Property="BorderBrush" Value="{StaticResource IslandOutline}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="ClipToBounds" Value="True" />
+    <Setter Property="Focusable" Value="True" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="RenderTransformOrigin" Value="50%,0%" />
+    <Setter Property="RenderTransform" Value="scale(1)" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <DoubleTransition Property="Width" Duration="0:0:0.6">
+          <DoubleTransition.Easing><c:SpringEase Response="0.42" DampingFraction="0.74" Duration="0.6" /></DoubleTransition.Easing>
+        </DoubleTransition>
+        <DoubleTransition Property="Height" Duration="0:0:0.6">
+          <DoubleTransition.Easing><c:SpringEase Response="0.44" DampingFraction="0.8" Duration="0.6" /></DoubleTransition.Easing>
+        </DoubleTransition>
+        <CornerRadiusTransition Property="CornerRadius" Duration="0:0:0.45">
+          <CornerRadiusTransition.Easing><c:SpringEase Response="0.4" DampingFraction="0.9" Duration="0.45" /></CornerRadiusTransition.Easing>
+        </CornerRadiusTransition>
+        <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.35">
+          <TransformOperationsTransition.Easing><c:SpringEase Response="0.3" DampingFraction="0.6" Duration="0.35" /></TransformOperationsTransition.Easing>
+        </TransformOperationsTransition>
+        <BrushTransition Property="BorderBrush" Duration="0:0:0.2" />
+      </Transitions>
+    </Setter>
+  </Style>
+
+  <Style Selector="Border.island:pointerover">
+    <Setter Property="RenderTransform" Value="scale(1.035)" />
+  </Style>
+  <Style Selector="Border.island.expanded:pointerover">
+    <Setter Property="RenderTransform" Value="scale(1)" />
+  </Style>
+  <Style Selector="Border.island:focus-visible">
+    <Setter Property="BorderBrush" Value="#99FFFFFF" />
+  </Style>
+
+  <!-- ===== Content that fades with the island state ===== -->
+
+  <Style Selector=":is(Control).fade">
+    <Setter Property="Opacity" Value="0" />
+    <Setter Property="IsHitTestVisible" Value="False" />
+    <Setter Property="RenderTransformOrigin" Value="50%,0%" />
+    <Setter Property="RenderTransform" Value="scale(0.94)" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <DoubleTransition Property="Opacity" Duration="0:0:0.16" Easing="CubicEaseOut" />
+        <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.45">
+          <TransformOperationsTransition.Easing><c:SpringEase Response="0.4" DampingFraction="0.8" Duration="0.45" /></TransformOperationsTransition.Easing>
+        </TransformOperationsTransition>
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector=":is(Control).fade.shown">
+    <Setter Property="Opacity" Value="1" />
+    <Setter Property="IsHitTestVisible" Value="True" />
+    <Setter Property="RenderTransform" Value="scale(1)" />
+  </Style>
+  <!-- Fade in a beat after the shape starts moving, so content never looks squashed. -->
+  <Style Selector=":is(Control).fade.shown.delayed">
+    <Setter Property="Transitions">
+      <Transitions>
+        <DoubleTransition Property="Opacity" Duration="0:0:0.22" Delay="0:0:0.12" Easing="CubicEaseOut" />
+        <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.5">
+          <TransformOperationsTransition.Easing><c:SpringEase Response="0.42" DampingFraction="0.78" Duration="0.5" /></TransformOperationsTransition.Easing>
+        </TransformOperationsTransition>
+      </Transitions>
+    </Setter>
+  </Style>
+
+  <!-- ===== Text ===== -->
+
+  <Style Selector="TextBlock.title">
+    <Setter Property="FontFamily" Value="{StaticResource IslandFont}" />
+    <Setter Property="FontSize" Value="15" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Foreground" Value="{StaticResource IslandPrimaryText}" />
+    <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+    <Setter Property="MaxLines" Value="1" />
+  </Style>
+  <Style Selector="TextBlock.subtitle">
+    <Setter Property="FontFamily" Value="{StaticResource IslandFont}" />
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="Foreground" Value="{StaticResource IslandSecondaryText}" />
+    <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+    <Setter Property="MaxLines" Value="1" />
+  </Style>
+  <Style Selector="TextBlock.caption">
+    <Setter Property="FontFamily" Value="{StaticResource IslandFont}" />
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="FontWeight" Value="Medium" />
+    <Setter Property="Foreground" Value="{StaticResource IslandTertiaryText}" />
+    <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+    <Setter Property="MaxLines" Value="1" />
+  </Style>
+  <Style Selector="TextBlock.clock">
+    <Setter Property="FontFamily" Value="{StaticResource IslandFont}" />
+    <Setter Property="FontSize" Value="30" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Foreground" Value="{StaticResource IslandPrimaryText}" />
+  </Style>
+
+  <!-- ===== Round icon buttons ===== -->
+
+  <Style Selector="Button.icon">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{StaticResource IslandPrimaryText}" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Width" Value="38" />
+    <Setter Property="Height" Value="38" />
+    <Setter Property="CornerRadius" Value="19" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+    <Setter Property="RenderTransform" Value="scale(1)" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.3">
+          <TransformOperationsTransition.Easing><c:SpringEase Response="0.25" DampingFraction="0.55" Duration="0.3" /></TransformOperationsTransition.Easing>
+        </TransformOperationsTransition>
+        <DoubleTransition Property="Opacity" Duration="0:0:0.15" />
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector="Button.icon PathIcon">
+    <Setter Property="Width" Value="18" />
+    <Setter Property="Height" Value="18" />
+  </Style>
+  <Style Selector="Button.icon.large">
+    <Setter Property="Width" Value="48" />
+    <Setter Property="Height" Value="48" />
+    <Setter Property="CornerRadius" Value="24" />
+  </Style>
+  <Style Selector="Button.icon.large PathIcon">
+    <Setter Property="Width" Value="26" />
+    <Setter Property="Height" Value="26" />
+  </Style>
+  <Style Selector="Button.icon.small">
+    <Setter Property="Width" Value="28" />
+    <Setter Property="Height" Value="28" />
+    <Setter Property="CornerRadius" Value="14" />
+    <Setter Property="Foreground" Value="{StaticResource IslandSecondaryText}" />
+  </Style>
+  <Style Selector="Button.icon.small PathIcon">
+    <Setter Property="Width" Value="15" />
+    <Setter Property="Height" Value="15" />
+  </Style>
+  <Style Selector="Button.icon:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource IslandControlHover}" />
+    <Setter Property="Foreground" Value="{StaticResource IslandPrimaryText}" />
+  </Style>
+  <Style Selector="Button.icon:pressed">
+    <Setter Property="RenderTransform" Value="scale(0.86)" />
+  </Style>
+  <Style Selector="Button.icon:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource IslandControlPressed}" />
+  </Style>
+  <Style Selector="Button.icon:disabled">
+    <Setter Property="Opacity" Value="0.3" />
+  </Style>
+  <Style Selector="Button.icon:disabled /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{StaticResource IslandPrimaryText}" />
+  </Style>
+  <Style Selector="Button.icon:focus-visible /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="BorderBrush" Value="#B3FFFFFF" />
+    <Setter Property="BorderThickness" Value="1.5" />
+  </Style>
+
+  <!-- ===== Island press: a quick squeeze, like iOS ===== -->
+
+  <Style Selector="Border.island.pressing">
+    <Setter Property="RenderTransform" Value="scale(0.96)" />
+  </Style>
+
+  <!-- ===== Staggered entrance for expanded content ===== -->
+
+  <Style Selector=":is(Control).pop">
+    <Setter Property="Opacity" Value="0" />
+    <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+    <Setter Property="RenderTransform" Value="translateY(10px) scale(0.92)" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <DoubleTransition Property="Opacity" Duration="0:0:0.12" />
+        <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.2" Easing="CubicEaseIn" />
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector=".shown :is(Control).pop">
+    <Setter Property="Opacity" Value="1" />
+    <Setter Property="RenderTransform" Value="translateY(0px) scale(1)" />
+  </Style>
+  <Style Selector=".shown :is(Control).pop.d1">
+    <Setter Property="Transitions">
+      <Transitions>
+        <DoubleTransition Property="Opacity" Duration="0:0:0.25" Delay="0:0:0.10" Easing="CubicEaseOut" />
+        <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.6" Delay="0:0:0.10">
+          <TransformOperationsTransition.Easing><c:SpringEase Response="0.45" DampingFraction="0.68" Duration="0.6" /></TransformOperationsTransition.Easing>
+        </TransformOperationsTransition>
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector=".shown :is(Control).pop.d2">
+    <Setter Property="Transitions">
+      <Transitions>
+        <DoubleTransition Property="Opacity" Duration="0:0:0.25" Delay="0:0:0.16" Easing="CubicEaseOut" />
+        <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.6" Delay="0:0:0.16">
+          <TransformOperationsTransition.Easing><c:SpringEase Response="0.45" DampingFraction="0.72" Duration="0.6" /></TransformOperationsTransition.Easing>
+        </TransformOperationsTransition>
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector=".shown :is(Control).pop.d3">
+    <Setter Property="Transitions">
+      <Transitions>
+        <DoubleTransition Property="Opacity" Duration="0:0:0.25" Delay="0:0:0.22" Easing="CubicEaseOut" />
+        <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.6" Delay="0:0:0.22">
+          <TransformOperationsTransition.Easing><c:SpringEase Response="0.45" DampingFraction="0.75" Duration="0.6" /></TransformOperationsTransition.Easing>
+        </TransformOperationsTransition>
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector=".shown :is(Control).pop.d4">
+    <Setter Property="Transitions">
+      <Transitions>
+        <DoubleTransition Property="Opacity" Duration="0:0:0.25" Delay="0:0:0.28" Easing="CubicEaseOut" />
+        <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.6" Delay="0:0:0.28">
+          <TransformOperationsTransition.Easing><c:SpringEase Response="0.45" DampingFraction="0.78" Duration="0.6" /></TransformOperationsTransition.Easing>
+        </TransformOperationsTransition>
+      </Transitions>
+    </Setter>
+  </Style>
+
+  <!-- ===== Album art: shrinks when paused, pops on a new track ===== -->
+
+  <Style Selector="Border.art">
+    <Setter Property="ClipToBounds" Value="True" />
+    <Setter Property="Background" Value="{StaticResource IslandPlaceholder}" />
+    <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+    <Setter Property="RenderTransform" Value="scale(1)" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.55">
+          <TransformOperationsTransition.Easing><c:SpringEase Response="0.38" DampingFraction="0.55" Duration="0.55" /></TransformOperationsTransition.Easing>
+        </TransformOperationsTransition>
+        <DoubleTransition Property="Opacity" Duration="0:0:0.3" />
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector="Border.art.paused">
+    <Setter Property="RenderTransform" Value="scale(0.86)" />
+    <Setter Property="Opacity" Value="0.7" />
+  </Style>
+  <Style Selector="Border.art.bump">
+    <Setter Property="RenderTransform" Value="scale(1.14)" />
+  </Style>
+
+  <!-- ===== Play/pause icon morph ===== -->
+
+  <Style Selector="PathIcon.swap">
+    <Setter Property="Opacity" Value="0" />
+    <Setter Property="RenderTransformOrigin" Value="50%,50%" />
+    <Setter Property="RenderTransform" Value="rotate(-90deg) scale(0.3)" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <DoubleTransition Property="Opacity" Duration="0:0:0.14" />
+        <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.45">
+          <TransformOperationsTransition.Easing><c:SpringEase Response="0.32" DampingFraction="0.62" Duration="0.45" /></TransformOperationsTransition.Easing>
+        </TransformOperationsTransition>
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector="PathIcon.swap.on">
+    <Setter Property="Opacity" Value="1" />
+    <Setter Property="RenderTransform" Value="rotate(0deg) scale(1)" />
+  </Style>
+
+  <!-- ===== Track text cross-slide ===== -->
+
+  <Style Selector="TransitioningContentControl.track">
+    <Setter Property="ClipToBounds" Value="True" />
+    <Setter Property="PageTransition">
+      <CompositePageTransition>
+        <CrossFade Duration="0:0:0.3" />
+        <PageSlide Duration="0:0:0.35" Orientation="Vertical" SlideInEasing="CubicEaseOut" SlideOutEasing="CubicEaseIn" />
+      </CompositePageTransition>
+    </Setter>
+  </Style>
+  <Style Selector="TransitioningContentControl.artfade">
+    <Setter Property="PageTransition">
+      <CrossFade Duration="0:0:0.45" />
+    </Setter>
+  </Style>
+
+  <!-- ===== Ambient glow behind the expanded card ===== -->
+
+  <Style Selector="Border.glow">
+    <Setter Property="Opacity" Value="0" />
+    <Setter Property="IsHitTestVisible" Value="False" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <DoubleTransition Property="Opacity" Duration="0:0:0.8" Easing="SineEaseInOut" />
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector="Border.glow.on">
+    <Style.Animations>
+      <Animation Duration="0:0:2.8" IterationCount="INFINITE" PlaybackDirection="Alternate" Easing="SineEaseInOut">
+        <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.55" /></KeyFrame>
+        <KeyFrame Cue="100%"><Setter Property="Opacity" Value="1" /></KeyFrame>
+      </Animation>
+    </Style.Animations>
+  </Style>
+
+  <!-- ===== Progress bar ===== -->
+
+  <Style Selector="Border.track">
+    <Setter Property="Height" Value="5" />
+    <Setter Property="CornerRadius" Value="2.5" />
+    <Setter Property="Background" Value="#2EFFFFFF" />
+    <Setter Property="ClipToBounds" Value="True" />
+  </Style>
+  <Style Selector="Border.fill">
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="CornerRadius" Value="2.5" />
+  </Style>
+  <Style Selector="Border.fill.smooth">
+    <Setter Property="Transitions">
+      <Transitions>
+        <DoubleTransition Property="Width" Duration="0:0:1" />
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector="TextBlock.time">
+    <Setter Property="FontFamily" Value="{StaticResource IslandFont}" />
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="FontWeight" Value="Medium" />
+    <Setter Property="Foreground" Value="{StaticResource IslandTertiaryText}" />
+    <Setter Property="FontFeatures" Value="+tnum" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+
+  <!-- ===== Unseen-activity dot ===== -->
+
+  <Style Selector="Ellipse.pulse">
+    <Style.Animations>
+      <Animation Duration="0:0:1.1" IterationCount="INFINITE" PlaybackDirection="Alternate" Easing="SineEaseInOut">
+        <KeyFrame Cue="0%"><Setter Property="Opacity" Value="1" /></KeyFrame>
+        <KeyFrame Cue="100%"><Setter Property="Opacity" Value="0.3" /></KeyFrame>
+      </Animation>
+    </Style.Animations>
+  </Style>
+
+  <!-- ===== Visualizer bars (animate only while playing) ===== -->
+
+  <Style Selector="Rectangle.bar">
+    <Setter Property="Width" Value="3" />
+    <Setter Property="Height" Value="4" />
+    <Setter Property="RadiusX" Value="1.5" />
+    <Setter Property="RadiusY" Value="1.5" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <DoubleTransition Property="Height" Duration="0:0:0.3" Easing="CubicEaseOut" />
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector="StackPanel.playing Rectangle.bar.b1">
+    <Style.Animations>
+      <Animation Duration="0:0:0.62" IterationCount="INFINITE" PlaybackDirection="Alternate" Easing="SineEaseInOut">
+        <KeyFrame Cue="0%"><Setter Property="Height" Value="5" /></KeyFrame>
+        <KeyFrame Cue="100%"><Setter Property="Height" Value="14" /></KeyFrame>
+      </Animation>
+    </Style.Animations>
+  </Style>
+  <Style Selector="StackPanel.playing Rectangle.bar.b2">
+    <Style.Animations>
+      <Animation Duration="0:0:0.48" IterationCount="INFINITE" PlaybackDirection="Alternate" Easing="SineEaseInOut">
+        <KeyFrame Cue="0%"><Setter Property="Height" Value="13" /></KeyFrame>
+        <KeyFrame Cue="100%"><Setter Property="Height" Value="4" /></KeyFrame>
+      </Animation>
+    </Style.Animations>
+  </Style>
+  <Style Selector="StackPanel.playing Rectangle.bar.b3">
+    <Style.Animations>
+      <Animation Duration="0:0:0.71" IterationCount="INFINITE" PlaybackDirection="Alternate" Easing="SineEaseInOut">
+        <KeyFrame Cue="0%"><Setter Property="Height" Value="6" /></KeyFrame>
+        <KeyFrame Cue="100%"><Setter Property="Height" Value="13" /></KeyFrame>
+      </Animation>
+    </Style.Animations>
+  </Style>
+  <Style Selector="StackPanel.playing Rectangle.bar.b4">
+    <Style.Animations>
+      <Animation Duration="0:0:0.55" IterationCount="INFINITE" PlaybackDirection="Alternate" Easing="SineEaseInOut">
+        <KeyFrame Cue="0%"><Setter Property="Height" Value="11" /></KeyFrame>
+        <KeyFrame Cue="100%"><Setter Property="Height" Value="3.5" /></KeyFrame>
+      </Animation>
+    </Style.Animations>
+  </Style>
+</Styles>

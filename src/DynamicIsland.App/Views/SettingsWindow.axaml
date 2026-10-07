@@ -1,0 +1,208 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:DynamicIsland.App.ViewModels"
+        x:Class="DynamicIsland.App.Views.SettingsWindow"
+        x:DataType="vm:SettingsViewModel"
+        Title="Dynamic Island Settings"
+        Width="520" Height="720" MinWidth="420" MinHeight="480"
+        WindowStartupLocation="CenterScreen"
+        TransparencyLevelHint="Mica, AcrylicBlur, None"
+        Background="#D8101012"
+        ExtendClientAreaToDecorationsHint="True"
+        FontFamily="{StaticResource IslandFont}">
+
+  <Window.Styles>
+    <Style Selector="Border.card">
+      <Setter Property="Background" Value="#0DFFFFFF" />
+      <Setter Property="BorderBrush" Value="#14FFFFFF" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="12" />
+      <Setter Property="Padding" Value="18,6" />
+    </Style>
+    <Style Selector="TextBlock.section">
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="#B3FFFFFF" />
+      <Setter Property="Margin" Value="4,22,0,8" />
+    </Style>
+    <Style Selector="Grid.row">
+      <Setter Property="MinHeight" Value="52" />
+    </Style>
+    <Style Selector="TextBlock.label">
+      <Setter Property="FontSize" Value="14" />
+      <Setter Property="Foreground" Value="#F2FFFFFF" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+      <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+    <Style Selector="TextBlock.hint">
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="Foreground" Value="#80FFFFFF" />
+      <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+    <Style Selector="Separator">
+      <Setter Property="Background" Value="#12FFFFFF" />
+      <Setter Property="Margin" Value="0" />
+      <Setter Property="Height" Value="1" />
+    </Style>
+    <Style Selector="ToggleSwitch">
+      <Setter Property="OnContent" Value="{x:Null}" />
+      <Setter Property="OffContent" Value="{x:Null}" />
+      <Setter Property="MinWidth" Value="0" />
+      <Setter Property="HorizontalAlignment" Value="Right" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+  </Window.Styles>
+
+  <Grid RowDefinitions="Auto,*,Auto">
+
+    <!-- Header (sits in the extended title-bar area) -->
+    <StackPanel Margin="28,44,28,0" Spacing="4" IsHitTestVisible="False">
+      <TextBlock Text="Dynamic Island" FontSize="26" FontWeight="SemiBold" Foreground="White" />
+      <TextBlock Classes="hint" Text="{Binding HotkeyText}" FontSize="13" />
+    </StackPanel>
+
+    <ScrollViewer Grid.Row="1" Margin="0,8,0,0" Padding="24,0,24,24">
+      <StackPanel>
+
+        <!-- General -->
+        <TextBlock Classes="section" Text="General" />
+        <Border Classes="card">
+          <StackPanel>
+            <Grid Classes="row" ColumnDefinitions="*,Auto">
+              <TextBlock Classes="label" Text="Show the island" />
+              <ToggleSwitch Grid.Column="1" IsChecked="{Binding ShowIsland}" AutomationProperties.Name="Show the island" />
+            </Grid>
+            <Separator />
+            <Grid Classes="row" ColumnDefinitions="*,Auto">
+              <TextBlock Classes="label" Text="Start when I sign in" />
+              <ToggleSwitch Grid.Column="1" IsChecked="{Binding StartWithSystem}" IsEnabled="{Binding StartupSupported}"
+                            AutomationProperties.Name="Start when I sign in" />
+            </Grid>
+            <Separator />
+            <Grid Classes="row" ColumnDefinitions="*,Auto">
+              <TextBlock Classes="label" Text="Display" />
+              <ComboBox Grid.Column="1" MinWidth="200" VerticalAlignment="Center"
+                        ItemsSource="{Binding Displays}" SelectedIndex="{Binding SelectedDisplay}"
+                        AutomationProperties.Name="Display" />
+            </Grid>
+            <Separator />
+            <Grid Classes="row" ColumnDefinitions="*,200,48">
+              <TextBlock Classes="label" Text="Distance from top" />
+              <Slider Grid.Column="1" Minimum="0" Maximum="48" SmallChange="1" LargeChange="4"
+                      TickFrequency="1" IsSnapToTickEnabled="True" VerticalAlignment="Center"
+                      Value="{Binding VerticalOffset}" AutomationProperties.Name="Distance from top" />
+              <TextBlock Grid.Column="2" Classes="hint" Text="{Binding VerticalOffsetText}"
+                         VerticalAlignment="Center" HorizontalAlignment="Right" />
+            </Grid>
+            <Separator />
+            <Grid Classes="row" ColumnDefinitions="*,200,48">
+              <TextBlock Classes="label" Text="Collapse after" />
+              <Slider Grid.Column="1" Minimum="2" Maximum="15" SmallChange="1" LargeChange="2"
+                      TickFrequency="1" IsSnapToTickEnabled="True" VerticalAlignment="Center"
+                      Value="{Binding AutoCollapseSeconds}" AutomationProperties.Name="Collapse after seconds" />
+              <TextBlock Grid.Column="2" Classes="hint" Text="{Binding AutoCollapseText}"
+                         VerticalAlignment="Center" HorizontalAlignment="Right" />
+            </Grid>
+            <Separator />
+            <Grid Classes="row" ColumnDefinitions="*,Auto">
+              <TextBlock Classes="label" Text="Hide while a full-screen app is open" />
+              <ToggleSwitch Grid.Column="1" IsChecked="{Binding HideInFullScreen}"
+                            AutomationProperties.Name="Hide while a full-screen app is open" />
+            </Grid>
+          </StackPanel>
+        </Border>
+
+        <!-- Media -->
+        <TextBlock Classes="section" Text="Media" />
+        <Border Classes="card">
+          <StackPanel>
+            <Grid Classes="row" ColumnDefinitions="*,Auto">
+              <TextBlock Classes="label" Text="Show what's playing" />
+              <ToggleSwitch Grid.Column="1" IsChecked="{Binding ShowMedia}" AutomationProperties.Name="Show what's playing" />
+            </Grid>
+            <Separator />
+            <Grid Classes="row" ColumnDefinitions="*,Auto">
+              <TextBlock Classes="label" Text="Expand briefly when the track changes" />
+              <ToggleSwitch Grid.Column="1" IsChecked="{Binding ExpandOnTrackChange}" IsEnabled="{Binding ShowMedia}"
+                            AutomationProperties.Name="Expand briefly when the track changes" />
+            </Grid>
+            <Separator />
+            <Grid Classes="row" ColumnDefinitions="*,Auto">
+              <TextBlock Classes="label" Text="Animated visualizer" />
+              <ToggleSwitch Grid.Column="1" IsChecked="{Binding AnimatedVisualizer}" IsEnabled="{Binding ShowMedia}"
+                            AutomationProperties.Name="Animated visualizer" />
+            </Grid>
+            <Separator />
+            <Grid Classes="row" ColumnDefinitions="*,Auto">
+              <TextBlock Classes="label" Text="Colour accents from album art" />
+              <ToggleSwitch Grid.Column="1" IsChecked="{Binding TintFromArtwork}" IsEnabled="{Binding ShowMedia}"
+                            AutomationProperties.Name="Colour accents from album art" />
+            </Grid>
+          </StackPanel>
+        </Border>
+
+        <!-- Notifications -->
+        <TextBlock Classes="section" Text="Notifications" />
+        <Border Classes="card">
+          <StackPanel>
+            <Grid Classes="row" ColumnDefinitions="*,Auto">
+              <TextBlock Classes="label" Text="Show notifications" />
+              <ToggleSwitch Grid.Column="1" IsChecked="{Binding ShowNotifications}" AutomationProperties.Name="Show notifications" />
+            </Grid>
+            <Separator />
+            <Grid Classes="row" ColumnDefinitions="*,Auto">
+              <StackPanel VerticalAlignment="Center" Spacing="2">
+                <TextBlock Classes="label" Text="Hide message previews" />
+                <TextBlock Classes="hint" Text="Show only the app name for privacy." />
+              </StackPanel>
+              <ToggleSwitch Grid.Column="1" IsChecked="{Binding HideNotificationPreviews}" IsEnabled="{Binding ShowNotifications}"
+                            AutomationProperties.Name="Hide message previews" />
+            </Grid>
+            <Separator />
+            <Grid Classes="row" ColumnDefinitions="*,Auto">
+              <TextBlock Classes="label" Text="Expand for new notifications" />
+              <ToggleSwitch Grid.Column="1" IsChecked="{Binding ExpandOnNotification}" IsEnabled="{Binding ShowNotifications}"
+                            AutomationProperties.Name="Expand for new notifications" />
+            </Grid>
+            <Separator />
+            <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,12">
+              <Ellipse Width="8" Height="8" Margin="0,5,10,0" VerticalAlignment="Top"
+                       Fill="#34C759" IsVisible="{Binding NotificationsWorking}" />
+              <Ellipse Width="8" Height="8" Margin="0,5,10,0" VerticalAlignment="Top"
+                       Fill="#FF9F0A" IsVisible="{Binding !NotificationsWorking}" />
+              <TextBlock Grid.Column="1" Classes="hint" Text="{Binding NotificationStatus}" VerticalAlignment="Center" />
+              <Button Grid.Column="2" Margin="12,0,0,0" VerticalAlignment="Center"
+                      Content="Turn on access" Command="{Binding RequestNotificationAccessCommand}"
+                      IsVisible="{Binding CanRequestNotificationAccess}" />
+            </Grid>
+            <StackPanel IsVisible="{Binding HasMutedApps}">
+              <Separator />
+              <TextBlock Classes="label" Text="Muted apps" Margin="0,12,0,4" />
+              <ItemsControl ItemsSource="{Binding MutedApps}" Margin="0,0,0,10">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="x:String">
+                    <Grid ColumnDefinitions="*,Auto" MinHeight="36">
+                      <TextBlock Classes="hint" FontSize="13" Foreground="#D9FFFFFF" Text="{Binding}" VerticalAlignment="Center" />
+                      <Button Grid.Column="1" Content="Unmute" Padding="10,3"
+                              Command="{Binding $parent[Window].((vm:SettingsViewModel)DataContext).UnmuteCommand}"
+                              CommandParameter="{Binding}" />
+                    </Grid>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </StackPanel>
+        </Border>
+
+        <TextBlock Classes="hint" Margin="4,18,4,0"
+                   Text="Notification and media details stay on this device. Nothing is collected or sent anywhere." />
+      </StackPanel>
+    </ScrollViewer>
+
+    <!-- Footer -->
+    <Border Grid.Row="2" BorderBrush="#12FFFFFF" BorderThickness="0,1,0,0" Padding="24,14">
+      <Button Content="Restore defaults" HorizontalAlignment="Right"
+              Command="{Binding RestoreDefaultsCommand}" />
+    </Border>
+  </Grid>
+</Window>

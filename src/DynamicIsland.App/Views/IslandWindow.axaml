@@ -1,0 +1,241 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:DynamicIsland.App.ViewModels"
+        xmlns:img="using:Avalonia.Media.Imaging"
+        mc:Ignorable="d"
+        x:Class="DynamicIsland.App.Views.IslandWindow"
+        x:DataType="vm:IslandViewModel"
+        Title="Dynamic Island"
+        WindowDecorations="None"
+        Background="Transparent"
+        TransparencyLevelHint="Transparent"
+        Topmost="True"
+        ShowInTaskbar="False"
+        ShowActivated="False"
+        CanResize="False">
+
+  <Window.DataTemplates>
+    <DataTemplate x:DataType="img:Bitmap">
+      <Image Source="{Binding}" Stretch="UniformToFill" />
+    </DataTemplate>
+  </Window.DataTemplates>
+
+  <Panel>
+    <Border x:Name="Island"
+            Classes="island"
+            Classes.expanded="{Binding IsExpanded}"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Top"
+            Margin="0,4,0,0"
+            Width="{Binding IslandWidth}"
+            Height="{Binding IslandHeight}"
+            CornerRadius="{Binding IslandCornerRadius}"
+            AutomationProperties.Name="Dynamic Island">
+
+      <Panel>
+
+        <!-- Ambient colour from the album art, breathing slowly while music plays. -->
+        <Border Classes="glow" Classes.on="{Binding ShowAmbientGlow}" Background="{Binding GlowBrush}" />
+
+        <!-- ===== Compact, nothing playing: a quiet pill with an activity dot ===== -->
+        <Panel Classes="fade" Classes.shown="{Binding ShowCompactIdle}">
+          <Ellipse Width="6" Height="6"
+                   HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,14,0"
+                   Fill="{Binding AccentBrush}"
+                   Classes.pulse="{Binding HasUnseenActivity}"
+                   IsVisible="{Binding HasUnseenActivity}" />
+        </Panel>
+
+        <!-- ===== Compact, media playing: artwork left, visualizer right ===== -->
+        <Grid Classes="fade" Classes.shown="{Binding ShowCompactMedia}"
+              Width="236" Height="34"
+              HorizontalAlignment="Center" VerticalAlignment="Top"
+              ColumnDefinitions="Auto,*,Auto">
+          <Border x:Name="CompactArt" Classes="art" Classes.paused="{Binding IsPaused}"
+                  Width="22" Height="22" CornerRadius="6"
+                  Margin="6,0,0,0" VerticalAlignment="Center">
+            <Panel>
+              <PathIcon Data="{StaticResource IconMusic}" Width="11" Height="11"
+                        Foreground="{StaticResource IslandSecondaryText}"
+                        IsVisible="{Binding !HasArtwork}" />
+              <TransitioningContentControl Classes="artfade" Content="{Binding Artwork}" />
+            </Panel>
+          </Border>
+          <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="2.5"
+                      Margin="0,0,14,0" VerticalAlignment="Center"
+                      Classes.playing="{Binding AnimateCompactVisualizer}">
+            <Rectangle Classes="bar b1" Fill="{Binding AccentBrush}" />
+            <Rectangle Classes="bar b2" Fill="{Binding AccentBrush}" />
+            <Rectangle Classes="bar b3" Fill="{Binding AccentBrush}" />
+            <Rectangle Classes="bar b4" Fill="{Binding AccentBrush}" />
+          </StackPanel>
+        </Grid>
+
+        <!-- ===== Expanded, nothing playing: clock and date ===== -->
+        <Grid Classes="fade delayed" Classes.shown="{Binding ShowExpandedIdle}"
+              Width="300" Height="74"
+              HorizontalAlignment="Center" VerticalAlignment="Top"
+              ColumnDefinitions="Auto,*,Auto">
+          <TextBlock Classes="clock pop d1" Text="{Binding ClockText}"
+                     VerticalAlignment="Center" Margin="26,0,14,0" />
+          <StackPanel Grid.Column="1" Classes="pop d2" VerticalAlignment="Center" Spacing="1">
+            <TextBlock Classes="subtitle" Text="{Binding DateText}" Foreground="{StaticResource IslandPrimaryText}" />
+            <TextBlock Classes="caption" Text="Nothing playing" />
+          </StackPanel>
+          <Button Grid.Column="2" Classes="icon small pop d3" Margin="0,0,18,0"
+                  Command="{Binding OpenSettingsCommand}"
+                  ToolTip.Tip="Settings" AutomationProperties.Name="Settings">
+            <PathIcon Data="{StaticResource IconSettings}" />
+          </Button>
+        </Grid>
+
+        <!-- ===== Expanded, media: artwork, track info, progress and controls ===== -->
+        <Grid Classes="fade delayed" Classes.shown="{Binding ShowExpandedMedia}"
+              Width="372" Height="{Binding ExpandedMediaHeight}"
+              HorizontalAlignment="Center" VerticalAlignment="Top"
+              RowDefinitions="Auto,Auto,*">
+
+          <Grid ColumnDefinitions="Auto,*,Auto" Margin="22,20,24,0">
+            <Border x:Name="ExpandedArt" Classes="art pop d1" Classes.paused="{Binding IsPaused}"
+                    Width="60" Height="60" CornerRadius="15">
+              <Panel>
+                <PathIcon Data="{StaticResource IconMusic}" Width="24" Height="24"
+                          Foreground="{StaticResource IslandSecondaryText}"
+                          IsVisible="{Binding !HasArtwork}" />
+                <TransitioningContentControl Classes="artfade" Content="{Binding Artwork}" />
+              </Panel>
+            </Border>
+
+            <StackPanel Grid.Column="1" Classes="pop d2" VerticalAlignment="Center" Margin="14,0,12,0" Spacing="2">
+              <TransitioningContentControl Classes="track" Content="{Binding MediaTitle}">
+                <TransitioningContentControl.ContentTemplate>
+                  <DataTemplate x:DataType="x:String">
+                    <TextBlock Classes="title" Text="{Binding}" />
+                  </DataTemplate>
+                </TransitioningContentControl.ContentTemplate>
+              </TransitioningContentControl>
+              <TransitioningContentControl Classes="track" Content="{Binding MediaArtist}"
+                                           IsVisible="{Binding MediaArtist, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                <TransitioningContentControl.ContentTemplate>
+                  <DataTemplate x:DataType="x:String">
+                    <TextBlock Classes="subtitle" Text="{Binding}" />
+                  </DataTemplate>
+                </TransitioningContentControl.ContentTemplate>
+              </TransitioningContentControl>
+            </StackPanel>
+
+            <StackPanel Grid.Column="2" Classes="pop d2" Orientation="Horizontal" Spacing="2.5"
+                        VerticalAlignment="Center"
+                        Classes.playing="{Binding AnimateExpandedVisualizer}">
+              <Rectangle Classes="bar b1" Fill="{Binding AccentBrush}" />
+              <Rectangle Classes="bar b2" Fill="{Binding AccentBrush}" />
+              <Rectangle Classes="bar b3" Fill="{Binding AccentBrush}" />
+              <Rectangle Classes="bar b4" Fill="{Binding AccentBrush}" />
+            </StackPanel>
+          </Grid>
+
+          <!-- Progress: elapsed · bar · remaining -->
+          <Grid Grid.Row="1" Classes="pop d3" ColumnDefinitions="*,Auto,*" Margin="22,16,22,0"
+                IsVisible="{Binding HasTimeline}">
+            <TextBlock Classes="time" Text="{Binding ElapsedText}" HorizontalAlignment="Left" />
+            <Border Grid.Column="1" Classes="track" Width="232">
+              <Border Classes="fill" Classes.smooth="{Binding ProgressSmooth}"
+                      Width="{Binding ProgressWidth}" Background="{Binding AccentBrush}" />
+            </Border>
+            <TextBlock Grid.Column="2" Classes="time" Text="{Binding RemainingText}" HorizontalAlignment="Right" />
+          </Grid>
+
+          <Grid Grid.Row="2" Classes="pop d4" ColumnDefinitions="*,Auto,*" Margin="24,0,22,8" VerticalAlignment="Center">
+            <TextBlock Classes="caption" Text="{Binding MediaApp}" VerticalAlignment="Center" />
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="22" VerticalAlignment="Center">
+              <Button Classes="icon" Command="{Binding PreviousCommand}"
+                      ToolTip.Tip="Previous" AutomationProperties.Name="Previous track">
+                <PathIcon Data="{StaticResource IconPrevious}" />
+              </Button>
+              <Button Classes="icon large" Command="{Binding PlayPauseCommand}"
+                      AutomationProperties.Name="Play or pause">
+                <Panel>
+                  <PathIcon Classes="swap" Classes.on="{Binding IsPlaying}" Data="{StaticResource IconPause}" />
+                  <PathIcon Classes="swap" Classes.on="{Binding IsPaused}" Data="{StaticResource IconPlay}" />
+                </Panel>
+              </Button>
+              <Button Classes="icon" Command="{Binding NextCommand}"
+                      ToolTip.Tip="Next" AutomationProperties.Name="Next track">
+                <PathIcon Data="{StaticResource IconNext}" />
+              </Button>
+            </StackPanel>
+
+            <Button Grid.Column="2" Classes="icon small" HorizontalAlignment="Right"
+                    Command="{Binding OpenSettingsCommand}"
+                    ToolTip.Tip="Settings" AutomationProperties.Name="Settings">
+              <PathIcon Data="{StaticResource IconSettings}" />
+            </Button>
+          </Grid>
+        </Grid>
+
+        <!-- ===== Expanded, notification: app icon, title, message and actions ===== -->
+        <Grid Classes="fade delayed" Classes.shown="{Binding ShowExpandedNotification}"
+              Width="372" Height="116"
+              HorizontalAlignment="Center" VerticalAlignment="Top"
+              ColumnDefinitions="Auto,*" Margin="0">
+
+          <Border x:Name="NotificationIconBorder" Classes="art pop d1"
+                  Width="44" Height="44" CornerRadius="12" Margin="20,18,0,0"
+                  VerticalAlignment="Top" Background="#1F1F22">
+            <Panel>
+              <PathIcon Data="{StaticResource IconBell}" Width="20" Height="20"
+                        Foreground="{StaticResource IslandSecondaryText}"
+                        IsVisible="{Binding !HasNotificationIcon}" />
+              <TransitioningContentControl Classes="artfade" Content="{Binding NotificationIcon}" Margin="4" />
+            </Panel>
+          </Border>
+
+          <Grid Grid.Column="1" Margin="14,12,14,14" RowDefinitions="Auto,Auto,Auto">
+
+            <Grid Classes="pop d1" ColumnDefinitions="*,Auto">
+              <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                <TextBlock Classes="caption" Text="{Binding NotificationApp}" />
+                <TextBlock Classes="caption" Text="·  now" />
+                <Border Background="#26FFFFFF" CornerRadius="7" Padding="6,1"
+                        IsVisible="{Binding HasMoreNotifications}">
+                  <TextBlock Classes="caption" FontSize="10" Text="{Binding NotificationMoreText}"
+                             Foreground="{StaticResource IslandSecondaryText}" />
+                </Border>
+              </StackPanel>
+              <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="0">
+                <Button Classes="icon small" Command="{Binding MuteNotificationAppCommand}"
+                        ToolTip.Tip="{Binding MuteAppToolTip}" AutomationProperties.Name="Mute this app">
+                  <PathIcon Data="{StaticResource IconMute}" />
+                </Button>
+                <Button Classes="icon small" Command="{Binding OpenNotificationCommand}"
+                        ToolTip.Tip="Open app" AutomationProperties.Name="Open app">
+                  <PathIcon Data="{StaticResource IconOpen}" />
+                </Button>
+                <Button Classes="icon small" Command="{Binding DismissNotificationCommand}"
+                        ToolTip.Tip="Dismiss" AutomationProperties.Name="Dismiss notification">
+                  <PathIcon Data="{StaticResource IconClose}" />
+                </Button>
+              </StackPanel>
+            </Grid>
+
+            <TransitioningContentControl Grid.Row="1" Classes="track pop d2" Content="{Binding NotificationTitle}">
+              <TransitioningContentControl.ContentTemplate>
+                <DataTemplate x:DataType="x:String">
+                  <TextBlock Classes="title" Text="{Binding}" />
+                </DataTemplate>
+              </TransitioningContentControl.ContentTemplate>
+            </TransitioningContentControl>
+
+            <TextBlock Grid.Row="2" Classes="subtitle pop d3" Text="{Binding NotificationBody}"
+                       TextWrapping="Wrap" MaxLines="2" Margin="0,2,0,0"
+                       IsVisible="{Binding HasNotificationBody}" />
+          </Grid>
+        </Grid>
+
+      </Panel>
+    </Border>
+  </Panel>
+</Window>
