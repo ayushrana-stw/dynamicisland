@@ -1,0 +1,81 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:DynamicIsland.Droid.ViewModels"
+             x:Class="DynamicIsland.Droid.Views.PermissionsPanel"
+             x:DataType="vm:MainViewModel">
+  <!-- Shown inside SettingsView, so it uses that view's card / row / label / hint styles. -->
+  <UserControl.Styles>
+    <Style Selector="TextBlock.granted">
+      <Setter Property="Text" Value="On" />
+      <Setter Property="FontSize" Value="14" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="#34C759" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+      <Setter Property="Margin" Value="12,0,4,0" />
+    </Style>
+    <Style Selector="Button.allow">
+      <Setter Property="Margin" Value="12,0,0,0" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+      <Setter Property="Content" Value="Allow" />
+    </Style>
+  </UserControl.Styles>
+
+  <StackPanel>
+    <TextBlock Classes="section" Text="Permissions" />
+    <Border Classes="card">
+      <StackPanel>
+        <Grid Classes="row" ColumnDefinitions="*,Auto">
+          <StackPanel VerticalAlignment="Center" Spacing="2" Margin="0,8">
+            <TextBlock Classes="label" Text="Show around the camera" />
+            <TextBlock Classes="hint" Text="Turn on Dynamic Island under Accessibility so the island can sit over the status bar and still be tapped. It doesn't read your screen. If Android calls it a restricted setting: App info › ⋮ › Allow restricted settings." />
+          </StackPanel>
+          <TextBlock Grid.Column="1" Classes="granted" IsVisible="{Binding HasAccessibilityOverlay}" />
+          <Button Grid.Column="1" Classes="allow accent" Command="{Binding AllowAccessibilityOverlayCommand}"
+                  IsVisible="{Binding !HasAccessibilityOverlay}" AutomationProperties.Name="Turn on show around the camera" />
+        </Grid>
+        <Separator />
+        <Grid Classes="row" ColumnDefinitions="*,Auto">
+          <StackPanel VerticalAlignment="Center" Spacing="2" Margin="0,8">
+            <TextBlock Classes="label" Text="Display over other apps" />
+            <TextBlock Classes="hint" Text="Shows the island just below the status bar when the option above is off." />
+          </StackPanel>
+          <TextBlock Grid.Column="1" Classes="granted" IsVisible="{Binding CanDrawOverlays}" />
+          <Button Grid.Column="1" Classes="allow" Command="{Binding AllowOverlayCommand}"
+                  IsVisible="{Binding !CanDrawOverlays}" AutomationProperties.Name="Allow display over other apps" />
+        </Grid>
+        <Separator />
+        <Grid Classes="row" ColumnDefinitions="*,Auto">
+          <StackPanel VerticalAlignment="Center" Spacing="2" Margin="0,8">
+            <TextBlock Classes="label" Text="Notification access" />
+            <TextBlock Classes="hint" Text="Shows your notifications and what's playing in the island." />
+          </StackPanel>
+          <TextBlock Grid.Column="1" Classes="granted" IsVisible="{Binding HasNotificationAccess}" />
+          <Button Grid.Column="1" Classes="allow" Command="{Binding AllowNotificationAccessCommand}"
+                  IsVisible="{Binding !HasNotificationAccess}" AutomationProperties.Name="Allow notification access" />
+        </Grid>
+        <StackPanel IsVisible="{Binding AsksForNotifications}">
+          <Separator />
+          <Grid Classes="row" ColumnDefinitions="*,Auto">
+            <StackPanel VerticalAlignment="Center" Spacing="2" Margin="0,8">
+              <TextBlock Classes="label" Text="Keep-running notice" />
+              <TextBlock Classes="hint" Text="Android shows a small notice while the island runs." />
+            </StackPanel>
+            <TextBlock Grid.Column="1" Classes="granted" IsVisible="{Binding CanPostNotifications}" />
+            <Button Grid.Column="1" Classes="allow" Command="{Binding AllowPostNotificationsCommand}"
+                    IsVisible="{Binding !CanPostNotifications}" AutomationProperties.Name="Allow the keep-running notice" />
+          </Grid>
+        </StackPanel>
+        <Separator />
+        <Grid Classes="row" ColumnDefinitions="*,Auto">
+          <StackPanel VerticalAlignment="Center" Spacing="2" Margin="0,8">
+            <TextBlock Classes="label" Text="Run in the background" />
+            <TextBlock Classes="hint" Text="Stops battery saving from closing the island." />
+          </StackPanel>
+          <TextBlock Grid.Column="1" Classes="granted" IsVisible="{Binding IgnoresBatteryOptimizations}" />
+          <Button Grid.Column="1" Classes="allow" Command="{Binding AllowBackgroundCommand}"
+                  IsVisible="{Binding !IgnoresBatteryOptimizations}" AutomationProperties.Name="Allow running in the background" />
+        </Grid>
+      </StackPanel>
+    </Border>
+  </StackPanel>
+</UserControl>

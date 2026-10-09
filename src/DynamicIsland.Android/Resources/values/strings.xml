@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="accessibility_description">Lets Dynamic Island float over the status bar, around the camera, where you can tap it. Dynamic Island does not read the screen or anything you type.</string>
+</resources>

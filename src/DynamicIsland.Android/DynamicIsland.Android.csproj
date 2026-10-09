@@ -6,7 +6,8 @@
   -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net9.0-android</TargetFramework>
+    <!-- Avalonia 12's Android support needs .NET 10; the shared libraries stay on .NET 9. -->
+    <TargetFramework>net10.0-android</TargetFramework>
     <!-- Android 8.0: the first version with TYPE_APPLICATION_OVERLAY windows. -->
     <SupportedOSPlatformVersion>26</SupportedOSPlatformVersion>
     <!-- "Android" would clash with the Android.* namespaces of the platform bindings. -->
@@ -19,6 +20,15 @@
     <AndroidPackageFormat>apk</AndroidPackageFormat>
     <AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+  </PropertyGroup>
+
+  <!--
+    Android Studio's default SDK folder, and the JDK that `scripts/setup-android.ps1` installs next to it.
+    Override with -p:AndroidSdkDirectory=... / -p:JavaSdkDirectory=... or ANDROID_HOME / JAVA_HOME.
+  -->
+  <PropertyGroup>
+    <AndroidSdkDirectory Condition="'$(AndroidSdkDirectory)' == '' and '$(ANDROID_HOME)' == '' and Exists('$(LOCALAPPDATA)\Android\Sdk')">$(LOCALAPPDATA)\Android\Sdk</AndroidSdkDirectory>
+    <JavaSdkDirectory Condition="'$(JavaSdkDirectory)' == '' and '$(JAVA_HOME)' == '' and Exists('$(LOCALAPPDATA)\Android\jdk')">$(LOCALAPPDATA)\Android\jdk</JavaSdkDirectory>
   </PropertyGroup>
 
   <!-- Release: one APK that installs on any phone (sideloading, no store). -->

@@ -26,6 +26,20 @@
       "problemMatcher": []
     },
     {
+      "label": "run on Android (phone or emulator)",
+      "type": "process",
+      "command": "dotnet",
+      "args": ["build", "${workspaceFolder}/src/DynamicIsland.Android", "-t:Run", "/property:GenerateFullPaths=true"],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "publish (Android APK)",
+      "type": "process",
+      "command": "dotnet",
+      "args": ["publish", "${workspaceFolder}/src/DynamicIsland.Android", "-c", "Release"],
+      "problemMatcher": "$msCompile"
+    },
+    {
       "label": "publish (Windows, trimmed single file)",
       "type": "process",
       "command": "dotnet",

@@ -111,8 +111,6 @@
                 <ToggleSwitch Grid.Column="1" IsChecked="{Binding HideInFullScreen}"
                               AutomationProperties.Name="Hide while a full-screen app is open" />
               </Grid>
-            </StackPanel>
-            <StackPanel IsVisible="{Binding IsDesktop}">
               <Separator />
               <Grid Classes="row" ColumnDefinitions="*,Auto">
                 <StackPanel VerticalAlignment="Center" Spacing="2">
