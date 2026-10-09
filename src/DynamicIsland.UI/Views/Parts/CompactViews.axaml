@@ -1,0 +1,92 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:DynamicIsland.UI.ViewModels"
+             xmlns:c="using:DynamicIsland.UI.Controls"
+             x:Class="DynamicIsland.UI.Views.Parts.CompactViews"
+             x:DataType="vm:IslandViewModel">
+  <Panel>
+
+    <!-- ===== Idle: quiet pill; hover shows the time ===== -->
+    <Grid Classes="fade" Classes.shown="{Binding ShowCompactIdle}" Height="34" VerticalAlignment="Top"
+          ColumnDefinitions="*,Auto,Auto">
+      <TextBlock Classes="caption" FontSize="13" Foreground="{StaticResource IslandPrimaryText}"
+                 Text="{Binding ClockText}" Margin="18,0,0,0" VerticalAlignment="Center"
+                 Opacity="{Binding ShowHoverClock, Converter={x:Static c:Converters.BoolToOpacity}}">
+        <TextBlock.Transitions>
+          <Transitions><DoubleTransition Property="Opacity" Duration="0:0:0.2" /></Transitions>
+        </TextBlock.Transitions>
+      </TextBlock>
+      <Ellipse Grid.Column="1" Classes="privacy" Fill="{Binding PrivacyBrush}" Margin="0,0,10,0"
+               VerticalAlignment="Center" IsVisible="{Binding ShowPrivacyDot}" />
+      <Ellipse Grid.Column="2" Width="6" Height="6" Margin="0,0,14,0" VerticalAlignment="Center"
+               Fill="{Binding AccentBrush}"
+               Classes.pulse="{Binding HasUnseenActivity}" IsVisible="{Binding HasUnseenActivity}" />
+    </Grid>
+
+    <!-- ===== Media: artwork · (title on hover) · visualizer ===== -->
+    <Grid Classes="fade" Classes.shown="{Binding ShowCompactMedia}" Height="34" VerticalAlignment="Top"
+          ColumnDefinitions="Auto,*,Auto,Auto">
+      <Border x:Name="CompactArt" Classes="art" Classes.paused="{Binding IsPaused}"
+              Width="22" Height="22" CornerRadius="6" Margin="6,0,0,0" VerticalAlignment="Center">
+        <Panel>
+          <PathIcon Data="{StaticResource IconMusic}" Width="11" Height="11"
+                    Foreground="{StaticResource IslandSecondaryText}" IsVisible="{Binding !HasArtwork}" />
+          <TransitioningContentControl Classes="artfade" Content="{Binding Artwork}" />
+        </Panel>
+      </Border>
+      <c:MarqueeText Grid.Column="1" Text="{Binding MediaTitle}" IsActive="{Binding AnimateHoverMarquee}"
+                     Margin="10,0,10,0" VerticalAlignment="Center"
+                     FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource IslandPrimaryText}"
+                     Opacity="{Binding ShowHoverTitle, Converter={x:Static c:Converters.BoolToOpacity}}">
+        <c:MarqueeText.Transitions>
+          <Transitions><DoubleTransition Property="Opacity" Duration="0:0:0.2" /></Transitions>
+        </c:MarqueeText.Transitions>
+      </c:MarqueeText>
+      <Ellipse Grid.Column="2" Classes="privacy" Fill="{Binding PrivacyBrush}" Margin="0,0,8,0"
+               VerticalAlignment="Center" IsVisible="{Binding ShowPrivacyDot}" />
+      <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="2.5" Margin="0,0,14,0" VerticalAlignment="Center"
+                  Classes.playing="{Binding AnimateCompactVisualizer}">
+        <Rectangle Classes="bar b1" Fill="{Binding AccentBrush}" />
+        <Rectangle Classes="bar b2" Fill="{Binding AccentBrush}" />
+        <Rectangle Classes="bar b3" Fill="{Binding AccentBrush}" />
+        <Rectangle Classes="bar b4" Fill="{Binding AccentBrush}" />
+      </StackPanel>
+    </Grid>
+
+    <!-- ===== Timer running, nothing playing ===== -->
+    <Grid Classes="fade" Classes.shown="{Binding ShowCompactTimer}" Height="34" VerticalAlignment="Top"
+          ColumnDefinitions="Auto,*,Auto,Auto">
+      <PathIcon Data="{StaticResource IconTimer}" Width="15" Height="15" Margin="14,0,0,0"
+                Foreground="#FFFF9F0A" VerticalAlignment="Center" />
+      <TextBlock Grid.Column="1" Classes="caption" FontSize="12" Text="{Binding TimerLabel}"
+                 Margin="8,0" VerticalAlignment="Center" />
+      <Ellipse Grid.Column="2" Classes="privacy" Fill="{Binding PrivacyBrush}" Margin="0,0,8,0"
+               VerticalAlignment="Center" IsVisible="{Binding ShowPrivacyDot}" />
+      <TextBlock Grid.Column="3" Classes="time" FontSize="14" FontWeight="SemiBold" Foreground="#FFFF9F0A"
+                 Text="{Binding TimerText}" Margin="0,0,16,0" />
+    </Grid>
+
+    <!-- ===== HUD: volume / brightness / battery ===== -->
+    <Grid Classes="fade" Classes.shown="{Binding ShowHud}" Height="34" VerticalAlignment="Top"
+          ColumnDefinitions="Auto,*,Auto">
+      <PathIcon Data="{Binding HudIcon}" Foreground="{Binding HudAccent}"
+                Width="16" Height="16" Margin="16,0,0,0" VerticalAlignment="Center" />
+      <Border Grid.Column="1" Classes="track" Width="{x:Static vm:IslandViewModel.HudTrackWidth}"
+              Height="6" CornerRadius="3" VerticalAlignment="Center" HorizontalAlignment="Center"
+              IsVisible="{Binding HudHasBar}">
+        <Border Classes="fill" Background="{Binding HudAccent}" CornerRadius="3" Width="{Binding HudBarWidth}">
+          <Border.Transitions>
+            <Transitions>
+              <DoubleTransition Property="Width" Duration="0:0:0.25">
+                <DoubleTransition.Easing><c:SpringEase Response="0.25" DampingFraction="0.85" Duration="0.25" /></DoubleTransition.Easing>
+              </DoubleTransition>
+            </Transitions>
+          </Border.Transitions>
+        </Border>
+      </Border>
+      <TextBlock Grid.Column="2" Classes="time" FontSize="12" Foreground="{StaticResource IslandPrimaryText}"
+                 Text="{Binding HudText}" Margin="0,0,16,0" MinWidth="24" TextAlignment="Right" />
+    </Grid>
+
+  </Panel>
+</UserControl>

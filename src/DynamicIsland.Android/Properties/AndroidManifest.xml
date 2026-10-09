@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:installLocation="internalOnly">
+  <!-- The island floats over other apps. -->
+  <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+  <!-- Keeps the island alive in the background; Android requires a visible "running" notification. -->
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+  <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+  <!-- "Start when the phone starts". -->
+  <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+  <!-- Lets the user exempt the island from battery optimisation so Android doesn't stop it. -->
+  <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+
+  <!-- App names and icons for notifications, and opening the app that sent one (Android 11+ package visibility). -->
+  <queries>
+    <intent>
+      <action android:name="android.intent.action.MAIN" />
+      <category android:name="android.intent.category.LAUNCHER" />
+    </intent>
+  </queries>
+
+  <application android:label="Dynamic Island" android:icon="@drawable/ic_launcher" android:allowBackup="false">
+    <!-- Declared here rather than with [Service] so the special-use reason can be given. -->
+    <service android:name="com.dynamicisland.app.IslandOverlayService"
+             android:exported="false"
+             android:foregroundServiceType="specialUse">
+      <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Shows a floating Dynamic Island overlay with media, notifications and timers." />
+    </service>
+  </application>
+</manifest>

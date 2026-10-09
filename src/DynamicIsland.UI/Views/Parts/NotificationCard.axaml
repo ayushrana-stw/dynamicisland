@@ -1,0 +1,56 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:DynamicIsland.UI.ViewModels"
+             x:Class="DynamicIsland.UI.Views.Parts.NotificationCard"
+             x:DataType="vm:IslandViewModel"
+             Width="372" Height="116" HorizontalAlignment="Center" VerticalAlignment="Top">
+
+  <Grid ColumnDefinitions="Auto,*">
+    <Border x:Name="Icon" Classes="art pop d1" Width="44" Height="44" CornerRadius="12" Margin="20,18,0,0"
+            VerticalAlignment="Top" Background="#1F1F22">
+      <Panel>
+        <PathIcon Data="{StaticResource IconBell}" Width="20" Height="20"
+                  Foreground="{StaticResource IslandSecondaryText}" IsVisible="{Binding !HasNotificationIcon}" />
+        <TransitioningContentControl Classes="artfade" Content="{Binding NotificationIcon}" Margin="4" />
+      </Panel>
+    </Border>
+
+    <Grid Grid.Column="1" Margin="14,12,14,14" RowDefinitions="Auto,Auto,Auto">
+      <Grid Classes="pop d1" ColumnDefinitions="*,Auto">
+        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+          <TextBlock Classes="caption" Text="{Binding NotificationApp}" />
+          <TextBlock Classes="caption" Text="·  now" />
+          <Border Background="#26FFFFFF" CornerRadius="7" Padding="6,1" IsVisible="{Binding HasMoreNotifications}">
+            <TextBlock Classes="caption" FontSize="10" Text="{Binding NotificationMoreText}"
+                       Foreground="{StaticResource IslandSecondaryText}" />
+          </Border>
+        </StackPanel>
+        <StackPanel Grid.Column="1" Orientation="Horizontal">
+          <Button Classes="icon small" Command="{Binding MuteNotificationAppCommand}"
+                  ToolTip.Tip="{Binding MuteAppToolTip}" AutomationProperties.Name="Mute this app">
+            <PathIcon Data="{StaticResource IconMute}" />
+          </Button>
+          <Button Classes="icon small" Command="{Binding OpenNotificationCommand}"
+                  ToolTip.Tip="Open app" AutomationProperties.Name="Open app">
+            <PathIcon Data="{StaticResource IconOpen}" />
+          </Button>
+          <Button Classes="icon small" Command="{Binding DismissNotificationCommand}"
+                  ToolTip.Tip="Dismiss" AutomationProperties.Name="Dismiss notification">
+            <PathIcon Data="{StaticResource IconClose}" />
+          </Button>
+        </StackPanel>
+      </Grid>
+
+      <TransitioningContentControl Grid.Row="1" Classes="track pop d2" Content="{Binding NotificationTitle}">
+        <TransitioningContentControl.ContentTemplate>
+          <DataTemplate x:DataType="x:String">
+            <TextBlock Classes="title" Text="{Binding}" />
+          </DataTemplate>
+        </TransitioningContentControl.ContentTemplate>
+      </TransitioningContentControl>
+
+      <TextBlock Grid.Row="2" Classes="subtitle pop d3" Text="{Binding NotificationBody}"
+                 TextWrapping="Wrap" MaxLines="2" Margin="0,2,0,0" IsVisible="{Binding HasNotificationBody}" />
+    </Grid>
+  </Grid>
+</UserControl>

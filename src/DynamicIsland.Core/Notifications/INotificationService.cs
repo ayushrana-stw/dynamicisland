@@ -9,7 +9,14 @@ public sealed record IslandNotification(
     string Title,
     string Body,
     byte[]? AppIcon,
-    DateTimeOffset Arrived);
+    DateTimeOffset Arrived)
+{
+    /// <summary>
+    /// True when read from an app's own pop-up window (e.g. Teams) rather than the OS notification centre.
+    /// Such notifications cannot be dismissed from the OS notification centre.
+    /// </summary>
+    public bool FromAppWindow { get; init; }
+}
 
 public enum NotificationAccess
 {

@@ -6,13 +6,13 @@ using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using DynamicIsland.App.Platform;
-using DynamicIsland.App.ViewModels;
 using DynamicIsland.App.Views;
 using DynamicIsland.Core.Media;
 using DynamicIsland.Core.Notifications;
 using DynamicIsland.Core.Platform;
 using DynamicIsland.Core.Settings;
 using DynamicIsland.Core.SystemStatus;
+using DynamicIsland.UI.ViewModels;
 
 namespace DynamicIsland.App;
 
@@ -66,12 +66,15 @@ public partial class App : Application
 
             var args = desktop.Args ?? [];
             var demo = args.Contains("--demo") || args.Contains("--snapshot");
-            _media = demo ? new Dev.DemoMediaService() : PlatformServices.CreateMediaService();
+            _media = demo ? new UI.Dev.DemoMediaService() : PlatformServices.CreateMediaService();
             _notifications = demo ? new NullNotificationService() : PlatformServices.CreateNotificationService();
             _startup = PlatformServices.CreateStartupManager();
 
             _system = demo ? new NullSystemStatusService() : PlatformServices.CreateSystemStatusService();
-            _islandViewModel = new IslandViewModel(_settings, _media, _notifications, _system);
+            _islandViewModel = new IslandViewModel(_settings, _media, _notifications, _system)
+            {
+                PlayAlert = PlatformServices.PlayAlert,
+            };
             _islandViewModel.SettingsRequested += (_, _) => ShowSettings();
             _islandViewModel.ExitRequested += (_, _) => _desktop?.Shutdown();
 
@@ -88,7 +91,7 @@ public partial class App : Application
 
             // Demo: a sample notification a few seconds after start.
             if (args.Contains("--demo"))
-                DispatcherTimer.RunOnce(() => _islandViewModel.ShowNotification(Dev.DemoNotifications.Teams()), TimeSpan.FromSeconds(4));
+                DispatcherTimer.RunOnce(() => _islandViewModel.ShowNotification(UI.Dev.DemoNotifications.Teams()), TimeSpan.FromSeconds(4));
 
             if (args.Contains("--settings"))
                 Dispatcher.UIThread.Post(ShowSettings);

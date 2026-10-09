@@ -1,6 +1,6 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             x:Class="DynamicIsland.App.App"
+             x:Class="DynamicIsland.Droid.App"
              Name="Dynamic Island"
              RequestedThemeVariant="Dark">
   <Application.Styles>

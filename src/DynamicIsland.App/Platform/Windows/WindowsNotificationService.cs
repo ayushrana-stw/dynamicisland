@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using DynamicIsland.Core.Diagnostics;
 using DynamicIsland.Core.Notifications;
 using Windows.UI.Notifications;
 using Windows.UI.Notifications.Management;
@@ -16,11 +17,15 @@ internal sealed partial class WindowsNotificationService : INotificationService
     // Fallback when Windows does not deliver change events to desktop apps.
     private static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(1);
 
+    // Backup scan while change events are subscribed (they can silently stop arriving).
+    private static readonly TimeSpan BackupPollInterval = TimeSpan.FromSeconds(3);
+
     private readonly HashSet<uint> _seen = [];
     private readonly SemaphoreSlim _scanGate = new(1, 1);
     private UserNotificationListener? _listener;
     private Timer? _pollTimer;
     private bool _eventsSubscribed;
+    private Teams.TeamsPopupWatcher? _teams;
 
     public NotificationAccess Access { get; private set; } = NotificationAccess.Unknown;
 
@@ -28,8 +33,15 @@ internal sealed partial class WindowsNotificationService : INotificationService
 
     public async Task<NotificationAccess> StartAsync()
     {
+        // Teams' own pop-ups don't need notification access or package identity.
+        // Started first, synchronously, because its window hook needs the UI thread.
+        StartTeamsWatcher();
+
         if (!HasPackageIdentity())
+        {
+            DebugLog.Write("Notifications: no package identity");
             return Access = NotificationAccess.NeedsSetup;
+        }
 
         if (_listener is not null && Access == NotificationAccess.Allowed)
             return Access;
@@ -40,34 +52,65 @@ internal sealed partial class WindowsNotificationService : INotificationService
 
             // Shows the Windows consent prompt the first time; must run on the UI thread.
             var status = await _listener.RequestAccessAsync();
+            DebugLog.Write($"Notifications: access {status}");
             if (status != UserNotificationListenerAccessStatus.Allowed)
                 return Access = NotificationAccess.Denied;
 
             // Existing notifications are history; only new ones should reach the island.
-            foreach (var existing in await _listener.GetNotificationsAsync(NotificationKinds.Toast))
-                _seen.Add(existing.Id);
+            var existing = await _listener.GetNotificationsAsync(NotificationKinds.Toast);
+            foreach (var notification in existing)
+                _seen.Add(notification.Id);
+            DebugLog.Write($"Notifications: {existing.Count} already in the notification centre from: " +
+                string.Join(", ", existing.Select(n => SafeAppName(n)).Distinct()));
 
             try
             {
                 _listener.NotificationChanged += OnNotificationChanged;
                 _eventsSubscribed = true;
+                DebugLog.Write("Notifications: listening for change events");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 // Some Windows builds only deliver this event to UWP background tasks.
-                _pollTimer = new Timer(_ => _ = ScanAsync(), null, PollInterval, PollInterval);
+                DebugLog.Write($"Notifications: change events unavailable ({ex.GetType().Name}: {ex.Message})");
             }
+
+            // Safety net: desktop apps sometimes subscribe successfully but never receive the event,
+            // so a light scan runs as well (every second without events, every few seconds with them).
+            var interval = _eventsSubscribed ? BackupPollInterval : PollInterval;
+            _pollTimer = new Timer(_ => _ = ScanAsync(), null, interval, interval);
 
             return Access = NotificationAccess.Allowed;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            DebugLog.Write($"Notifications: start failed: {ex}");
             return Access = NotificationAccess.Denied;
+        }
+    }
+
+    private void StartTeamsWatcher()
+    {
+        if (_teams is not null)
+            return;
+
+        _teams = new Teams.TeamsPopupWatcher();
+        _teams.Received += (_, notification) => Received?.Invoke(this, notification);
+        try
+        {
+            _teams.Start();
+        }
+        catch (Exception ex)
+        {
+            DebugLog.Write($"Teams: watcher failed: {ex.GetType().Name}: {ex.Message}");
         }
     }
 
     public Task DismissAsync(IslandNotification notification)
     {
+        if (notification.FromAppWindow)
+            return Task.CompletedTask; // Not in Windows' notification centre.
+
         try
         {
             _listener?.RemoveNotification(notification.Id);
@@ -119,12 +162,13 @@ internal sealed partial class WindowsNotificationService : INotificationService
                     return;
             }
 
-            if (await ConvertAsync(notification) is { } converted)
-                Received?.Invoke(this, converted);
+            DebugLog.Write($"Notifications: event from {SafeAppName(notification)}");
+            await PublishConvertedAsync(notification);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             // The notification may have been removed before it could be read.
+            DebugLog.Write($"Notifications: event handling failed: {ex.GetType().Name}: {ex.Message}");
         }
     }
 
@@ -136,25 +180,53 @@ internal sealed partial class WindowsNotificationService : INotificationService
         try
         {
             var current = await _listener.GetNotificationsAsync(NotificationKinds.Toast);
-            var fresh = current.Where(n => !_seen.Contains(n.Id)).OrderBy(n => n.CreationTime).ToList();
 
-            // Forget removed notifications so the set does not grow forever.
-            _seen.IntersectWith(current.Select(n => n.Id));
+            List<UserNotification> fresh;
+            lock (_seen)
+            {
+                fresh = current.Where(n => !_seen.Contains(n.Id)).OrderBy(n => n.CreationTime).ToList();
+
+                // Forget removed notifications so the set does not grow forever.
+                _seen.IntersectWith(current.Select(n => n.Id));
+                foreach (var notification in fresh)
+                    _seen.Add(notification.Id);
+            }
 
             foreach (var notification in fresh)
             {
-                _seen.Add(notification.Id);
-                if (await ConvertAsync(notification) is { } converted)
-                    Received?.Invoke(this, converted);
+                DebugLog.Write($"Notifications: scan found one from {SafeAppName(notification)}");
+                await PublishConvertedAsync(notification);
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             // Access can be revoked while running; the next scan tries again.
+            DebugLog.Write($"Notifications: scan failed: {ex.GetType().Name}: {ex.Message}");
         }
         finally
         {
             _scanGate.Release();
+        }
+    }
+
+    private async Task PublishConvertedAsync(UserNotification notification)
+    {
+        if (await ConvertAsync(notification) is { } converted)
+            Received?.Invoke(this, converted);
+        else
+            DebugLog.Write($"Notifications: skipped one from {SafeAppName(notification)} (no readable text)");
+    }
+
+    /// <summary>App name for the debug log only; message contents are never logged.</summary>
+    private static string SafeAppName(UserNotification notification)
+    {
+        try
+        {
+            return notification.AppInfo?.DisplayInfo?.DisplayName ?? "(unknown app)";
+        }
+        catch (Exception)
+        {
+            return "(unreadable app)";
         }
     }
 
@@ -220,6 +292,7 @@ internal sealed partial class WindowsNotificationService : INotificationService
 
     public void Dispose()
     {
+        _teams?.Dispose();
         _pollTimer?.Dispose();
 
         if (_eventsSubscribed && _listener is not null)

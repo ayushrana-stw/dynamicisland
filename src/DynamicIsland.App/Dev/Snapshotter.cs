@@ -2,9 +2,10 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
-using DynamicIsland.App.ViewModels;
 using DynamicIsland.Core.Settings;
 using DynamicIsland.Core.SystemStatus;
+using DynamicIsland.UI.Dev;
+using DynamicIsland.UI.ViewModels;
 
 namespace DynamicIsland.App.Dev;
 

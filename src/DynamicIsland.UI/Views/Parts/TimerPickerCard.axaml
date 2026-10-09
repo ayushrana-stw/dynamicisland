@@ -1,0 +1,33 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:DynamicIsland.UI.ViewModels"
+             x:Class="DynamicIsland.UI.Views.Parts.TimerPickerCard"
+             x:DataType="vm:IslandViewModel"
+             Width="372" Height="160" HorizontalAlignment="Center" VerticalAlignment="Top">
+
+  <Grid RowDefinitions="Auto,*" Margin="14,14,14,16">
+    <Grid Classes="pop d1" ColumnDefinitions="Auto,*,Auto">
+      <Button Classes="icon small" Command="{Binding BackCommand}" ToolTip.Tip="Back" AutomationProperties.Name="Back">
+        <PathIcon Data="{StaticResource IconBack}" />
+      </Button>
+      <TextBlock Grid.Column="1" Classes="title" Text="Timer" Margin="6,0,0,0" VerticalAlignment="Center" />
+      <Button Grid.Column="2" Classes="chip small accent" Command="{Binding StartStopwatchCommand}">
+        <StackPanel Orientation="Horizontal" Spacing="5">
+          <PathIcon Data="{StaticResource IconStopwatch}" Width="12" Height="12" />
+          <TextBlock Text="Stopwatch" VerticalAlignment="Center" />
+        </StackPanel>
+      </Button>
+    </Grid>
+
+    <UniformGrid Grid.Row="1" Columns="4" Rows="2" Margin="0,10,0,0">
+      <Button Classes="chip pop d2" Margin="3" Content="1 min" Command="{Binding StartTimerCommand}" CommandParameter="1" />
+      <Button Classes="chip pop d2" Margin="3" Content="3 min" Command="{Binding StartTimerCommand}" CommandParameter="3" />
+      <Button Classes="chip pop d2" Margin="3" Content="5 min" Command="{Binding StartTimerCommand}" CommandParameter="5" />
+      <Button Classes="chip pop d2" Margin="3" Content="10 min" Command="{Binding StartTimerCommand}" CommandParameter="10" />
+      <Button Classes="chip pop d3" Margin="3" Content="15 min" Command="{Binding StartTimerCommand}" CommandParameter="15" />
+      <Button Classes="chip pop d3" Margin="3" Content="25 min" Command="{Binding StartTimerCommand}" CommandParameter="25" />
+      <Button Classes="chip pop d3" Margin="3" Content="45 min" Command="{Binding StartTimerCommand}" CommandParameter="45" />
+      <Button Classes="chip pop d3" Margin="3" Content="1 hour" Command="{Binding StartTimerCommand}" CommandParameter="60" />
+    </UniformGrid>
+  </Grid>
+</UserControl>

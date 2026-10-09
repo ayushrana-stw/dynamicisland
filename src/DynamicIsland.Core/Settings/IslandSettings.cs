@@ -43,6 +43,9 @@ public sealed record IslandSettings
     public bool HideNotificationPreviews { get; set; }
     public bool ExpandOnNotification { get; set; } = true;
 
+    /// <summary>Read new Teams' own pop-ups (it doesn't use Windows notifications).</summary>
+    public bool ReadTeamsPopups { get; set; } = true;
+
     /// <summary>Display names of apps whose notifications are never shown.</summary>
     public string[] MutedNotificationApps { get; set; } = [];
 

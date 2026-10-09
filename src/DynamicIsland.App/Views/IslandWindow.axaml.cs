@@ -4,10 +4,9 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Platform;
 using Avalonia.Threading;
-using Avalonia.VisualTree;
 using DynamicIsland.App.Platform;
-using DynamicIsland.App.ViewModels;
 using DynamicIsland.Core.Settings;
+using DynamicIsland.UI.ViewModels;
 
 namespace DynamicIsland.App.Views;
 
@@ -19,6 +18,7 @@ public partial class IslandWindow : Window
 
     private readonly IIslandWindowPlatform _platform;
     private IslandViewModel? _viewModel;
+    private Border Island => IslandView.IslandSurface;
     private Rect _appliedBounds;
     private int _boundsVersion;
     private bool _fullScreenAppActive;
@@ -33,22 +33,6 @@ public partial class IslandWindow : Window
 
         Width = IslandViewModel.MaxWidth + HoverAllowance * 2;
         Height = IslandViewModel.MaxHeight + TopInset + HoverAllowance;
-
-        Island.Tapped += OnIslandTapped;
-        Island.PointerEntered += (_, _) => _viewModel?.OnPointerEntered();
-        Island.PointerExited += (_, _) => _viewModel?.OnPointerExited();
-        Island.PointerPressed += OnIslandPointerPressed;
-        Island.PointerReleased += (_, _) => Island.Classes.Remove("pressing");
-        Island.PointerCaptureLost += (_, _) => Island.Classes.Remove("pressing");
-
-        // The side bubble opens what it represents: the timer, or the island (mic/camera details).
-        Bubble.Tapped += (_, _) =>
-        {
-            if (_viewModel is { BubbleShowsTimer: true })
-                _viewModel.OpenTimerPickerCommand.Execute(null);
-            else
-                _viewModel?.Expand(peek: false);
-        };
 
         _platform.HotkeyPressed += (_, _) => OpenFromKeyboard();
         _platform.FullScreenChanged += OnFullScreenChanged;
@@ -75,14 +59,6 @@ public partial class IslandWindow : Window
 
         if (_viewModel is not null)
             _viewModel.PropertyChanged += OnViewModelPropertyChanged;
-    }
-
-    private void OnIslandPointerPressed(object? sender, PointerPressedEventArgs e)
-    {
-        if (e.Source is Visual source && source.FindAncestorOfType<Button>(includeSelf: true) is not null)
-            return;
-
-        Island.Classes.Add("pressing");
     }
 
     protected override void OnOpened(EventArgs e)
@@ -201,19 +177,6 @@ public partial class IslandWindow : Window
     }
 
     // ---- Input -------------------------------------------------------------------------------
-
-    private void OnIslandTapped(object? sender, TappedEventArgs e)
-    {
-        // Taps on the island's own buttons are handled by those buttons.
-        if (e.Source is Visual source && source.FindAncestorOfType<Button>(includeSelf: true) is not null)
-            return;
-
-        // Tapping a notification opens the app that sent it, like a banner on a phone.
-        if (_viewModel is { ShowExpandedNotification: true })
-            _viewModel.OpenNotificationCommand.Execute(null);
-        else
-            _viewModel?.ToggleExpanded();
-    }
 
     protected override void OnKeyDown(KeyEventArgs e)
     {
